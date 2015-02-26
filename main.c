@@ -1,19 +1,12 @@
-#include <GL/glut.h>
-
-void Display(void)
-{
-
-}
+#include "game_data.h"
+#include "initialize.h"
 
 int main(int argc, char** argv)
 {
-	glutInit(&argc, argv);
-
-	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
-
-	(void)glutCreateWindow("GAME TEST");
-
-	glutDisplayFunc(Display);
+	if(InitializeGameData(argc, argv) == FALSE)
+	{
+		return 1;
+	}
 
 	glutMainLoop();
 
