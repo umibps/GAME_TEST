@@ -1,7 +1,10 @@
 #ifndef _INCLUDED_VERTEX_H_
 #define _INCLUDED_VERTEX_H_
 
+<<<<<<< HEAD
 #include <stdarg.h>
+=======
+>>>>>>> 595175bcef89dcfa5ca4a1ef8275fb7d26b0dc89
 #include <GL/glew.h>
 #include <GL/glut.h>
 #include "types.h"
@@ -40,15 +43,25 @@ extern "C" {
  vertex_size	: 頂点バッファのサイズ
  index_size		: インデックスバッファのサイズ
  data_stride	: 頂点データ構造体のバイト数
+<<<<<<< HEAD
  可変長引数		: 配列の長さ(int), データのID(int), データの型(GLenum),
 					データの正規化有無(GL_TRUE or GL_FALSE), データのオフセット(size_t)
 					で指定する (最後は0)
+=======
+ vertex_key		: GLSLに渡した頂点座標の識別ID
+ vertex_offset	: 頂点座標データの位置
+ texture_key	: GLSLに渡したテクスチャ座標の識別ID
+ texture_offset	: テクスチャ座標データの位置
+ color_key		: GLSLに渡した色データの識別ID
+ color_offset	: 色データの位置
+>>>>>>> 595175bcef89dcfa5ca4a1ef8275fb7d26b0dc89
 */
 EXTERN void InitializeVertexBuffer(
 	VERTEX_BUFFER* buffer,
 	size_t vertex_size,
 	size_t index_size,
 	size_t data_stride,
+<<<<<<< HEAD
 	int first_size,
 	...
 );
@@ -97,6 +110,16 @@ EXTERN void SetAttributePointer(
 */
 EXTERN void VaListAttributePointer(va_list list, int first_size, size_t stride);
 
+=======
+	int vertex_key,
+	void* vertex_offset,
+	int texture_key,
+	void* texture_offset,
+	int color_key,
+	void* color_offset
+);
+
+>>>>>>> 595175bcef89dcfa5ca4a1ef8275fb7d26b0dc89
 #ifdef __cplusplus
 }
 #endif

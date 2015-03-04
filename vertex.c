@@ -1,5 +1,8 @@
 #include <string.h>
+<<<<<<< HEAD
 #include <stdarg.h>
+=======
+>>>>>>> 595175bcef89dcfa5ca4a1ef8275fb7d26b0dc89
 #include "vertex.h"
 
 #ifdef __cplusplus
@@ -14,15 +17,25 @@ extern "C" {
  vertex_size	: 頂点バッファのサイズ
  index_size		: インデックスバッファのサイズ
  data_stride	: 頂点データ構造体のバイト数
+<<<<<<< HEAD
  可変長引数		: 配列の長さ(int), データのID(int), データの型(GLenum),
 					データの正規化有無(GL_TRUE or GL_FALSE), データのオフセット(size_t)
 					で指定する (最後は0)
+=======
+ vertex_key		: GLSLに渡した頂点座標の識別ID
+ vertex_offset	: 頂点座標データの位置
+ texture_key	: GLSLに渡したテクスチャ座標の識別ID
+ texture_offset	: テクスチャ座標データの位置
+ color_key		: GLSLに渡した色データの識別ID
+ color_offset	: 色データの位置
+>>>>>>> 595175bcef89dcfa5ca4a1ef8275fb7d26b0dc89
 */
 void InitializeVertexBuffer(
 	VERTEX_BUFFER* buffer,
 	size_t vertex_size,
 	size_t index_size,
 	size_t data_stride,
+<<<<<<< HEAD
 	int first_size,
 	...
 )
@@ -34,6 +47,16 @@ void InitializeVertexBuffer(
 	size_t offset;			// データの位置
 	va_list list;			// 可変長引数のリスト
 
+=======
+	int vertex_key,
+	void* vertex_offset,
+	int texture_key,
+	void* texture_offset,
+	int color_key,
+	void* color_offset
+)
+{
+>>>>>>> 595175bcef89dcfa5ca4a1ef8275fb7d26b0dc89
 	(void)memset(buffer, 0, sizeof(*buffer));
 
 	// データ配置を記憶するバッファを生成
@@ -59,6 +82,7 @@ void InitializeVertexBuffer(
 	glBindBuffer(GL_ARRAY_BUFFER, buffer->vertex_buffer);
 
 	// 頂点のデータ位置を設定
+<<<<<<< HEAD
 	va_start(list, first_size);
 	VaListAttributePointer(list, first_size, data_stride);
 	va_end(list);
@@ -193,6 +217,43 @@ void SetAttributePointer(
 	va_end(list);
 }
 
+=======
+	glVertexAttribPointer(vertex_key, 3, GL_FLOAT, GL_FALSE, data_stride, vertex_offset);
+	if(texture_offset != NULL)
+	{
+		glVertexAttribPointer(texture_key, 2, GL_FLOAT, GL_FALSE, data_stride, texture_offset);
+	}
+	if(color_offset != NULL)
+	{
+		glVertexAttribPointer(color_key, 4, GL_UNSIGNED_BYTE, GL_TRUE, data_stride, color_offset);
+	}
+	glEnableVertexAttribArray(vertex_key);
+	if(texture_offset != NULL)
+	{
+		glEnableVertexAttribArray(texture_key);
+	}
+	if(color_offset != NULL)
+	{
+		glEnableVertexAttribArray(color_key);
+	}
+
+	// データ配置の記憶終了
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+	// データ配置を無効化しておく
+	glDisableVertexAttribArray(vertex_key);
+	if(texture_offset != NULL)
+	{
+		glDisableVertexAttribArray(texture_key);
+	}
+	if(color_offset != NULL)
+	{
+		glDisableVertexAttribArray(color_key);
+	}
+}
+
+>>>>>>> 595175bcef89dcfa5ca4a1ef8275fb7d26b0dc89
 #ifdef __cplusplus
 }
 #endif
