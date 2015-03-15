@@ -179,6 +179,7 @@ int InitializeShaderProgram(
 		glBindAttribLocation(program->program_id, key, attribute_name);
 		attribute_name = va_arg(list, const char*);
 	}
+	va_end(list);
 
 	// コンパイルしたシェーダーをリンク
 	if(ShaderProgramLink(program) == FALSE)

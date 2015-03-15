@@ -143,6 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="display_common.c" />
     <ClCompile Include="freeglut\fg_callbacks.c" />
     <ClCompile Include="freeglut\fg_cursor.c" />
     <ClCompile Include="freeglut\fg_display.c" />

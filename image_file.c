@@ -241,7 +241,10 @@ uint8* ReadJpegStream(
 	jpeg_mem_src(&decode, jpeg_data, (unsigned long)data_size);
 	
 	// ヘッダの読み込み
-	jpeg_read_header(&decode, FALSE);
+	if(jpeg_read_header(&decode, TRUE) != JPEG_HEADER_OK)
+	{
+		return NULL;
+	}
 
 	// 画像の幅、高さ、チャンネル数を取得
 	local_width = decode.image_width;

@@ -38,7 +38,9 @@ extern "C" {
  引数
  buffer			: 頂点バッファを管理する構造体
  vertex_size	: 頂点バッファのサイズ
+ vertex_data	: 頂点バッファに渡すデータ(NULL可)
  index_size		: インデックスバッファのサイズ
+ index_data		: インデックスバッファに渡すデータ(NULL可)
  data_stride	: 頂点データ構造体のバイト数
  可変長引数		: 配列の長さ(int), データのID(int), データの型(GLenum),
 					データの正規化有無(GL_TRUE or GL_FALSE), データのオフセット(size_t)
@@ -47,7 +49,9 @@ extern "C" {
 EXTERN void InitializeVertexBuffer(
 	VERTEX_BUFFER* buffer,
 	size_t vertex_size,
+	void* vertex_data,
 	size_t index_size,
+	void* index_data,
 	size_t data_stride,
 	int first_size,
 	...

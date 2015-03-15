@@ -6,10 +6,14 @@
 #include "texture.h"
 #include "display.h"
 
+/*
+ GAME_DATA構造体
+ ゲーム全体のデータを管理
+*/
 struct _GAME_DATA
 {
 	DISPLAY_PROGRAMS programs;
-	TEXTURE_BASE texture;
+	TEXTURE_BASE texture1, texture2;
 	DRAW_VERTEX vertex;
 	VERTEX_BUFFER vertex_buffer;
 };

@@ -12,7 +12,9 @@ extern "C" {
  引数
  buffer			: 頂点バッファを管理する構造体
  vertex_size	: 頂点バッファのサイズ
+ vertex_data	: 頂点バッファに渡すデータ(NULL可)
  index_size		: インデックスバッファのサイズ
+ index_data		: インデックスバッファに渡すデータ(NULL可)
  data_stride	: 頂点データ構造体のバイト数
  可変長引数		: 配列の長さ(int), データのID(int), データの型(GLenum),
 					データの正規化有無(GL_TRUE or GL_FALSE), データのオフセット(size_t)
@@ -21,7 +23,9 @@ extern "C" {
 void InitializeVertexBuffer(
 	VERTEX_BUFFER* buffer,
 	size_t vertex_size,
+	void* vertex_data,
 	size_t index_size,
+	void* index_data,
 	size_t data_stride,
 	int first_size,
 	...
@@ -42,21 +46,22 @@ void InitializeVertexBuffer(
 	// 頂点バッファを生成
 	glGenBuffers(1, &buffer->vertex_buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, buffer->vertex_buffer);
-	glBufferData(GL_ARRAY_BUFFER, vertex_size, NULL, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertex_size, vertex_data, GL_DYNAMIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	// インデックスバッファを生成
 	glGenBuffers(1, &buffer->index_buffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer->index_buffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_size, NULL, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_size, index_data, GL_STATIC_DRAW);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	// データの配置記憶を開始
 	glBindVertexArray(buffer->vertex_array);
 
 	// 頂点バッファの配置を設定
-		// 生成した頂点バッファを呼び出す
+		// 生成した頂点バッファとインデックスバッファを呼び出す
 	glBindBuffer(GL_ARRAY_BUFFER, buffer->vertex_buffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer->index_buffer);
 
 	// 頂点のデータ位置を設定
 	va_start(list, first_size);

@@ -21,6 +21,14 @@ extern "C" {
 
 EXTERN void Display(void);
 
+/*
+ SetUpStateOfOpenGL関数
+ OpenGLの状態をデフォルト状態に設定する
+ 引数
+ game_data	: ゲーム全体を管理するデータ
+*/
+EXTERN void SetUpStateOfOpenGL(GAME_DATA* game_data);
+
 #ifdef __cplusplus
 }
 #endif
