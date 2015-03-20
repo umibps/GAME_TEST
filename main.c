@@ -1,4 +1,4 @@
-#include "game_data.h"
+﻿#include "game_data.h"
 #include "initialize.h"
 
 int main(int argc, char** argv)

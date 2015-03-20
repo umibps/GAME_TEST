@@ -28,6 +28,30 @@ EXTERN uint8* ReadPngStream(
 );
 
 /*
+ WritePngStream関数
+ PNGイメージデータをエンコードして書き出す
+ 引数
+ stream			: データストリーム
+ write_func		: 読み込みに使用する関数ポインタ
+ flush_func		: バッファクリア用の関数ポインタ(NULL指定可能)
+ pixels			: 画像のピクセルデータ
+ width			: 画像の幅
+ height			: 画像の高さ
+ channel		: 画像のチャンネル数
+ compression	: 圧縮レベル
+*/
+EXTERN void WritePngStream(
+	void* stream,
+	size_t(*write_func)(void*, size_t, size_t, void*),
+	void(*flush_func)(void*),
+	uint8* pixels,
+	int width,
+	int height,
+	int channel,
+	int compression
+);
+
+/*
  ReadJpegStream関数
  引数
  stream		: データストリーム

@@ -4,6 +4,7 @@
 #include <GL/glew.h>
 #include <GL/glut.h>
 #include "types.h"
+#include "text.h"
 
 /*
  TEXTURE_BASE構造体
@@ -84,6 +85,24 @@ EXTERN int InitializeImageTexture(
 	long(*tell_func)(void*),
 	int(*close_func)(void*, void*),
 	void* user_data
+);
+
+/*
+ InitializeTextTexture関数
+ テキストのテクスチャを生成する
+ 引数
+ texture		: テクスチャの基本データ構造体
+ text_draw		: テキストの描画を管理するデータ
+ utf8_text		: 描画するテキスト
+ num_character	: 描画する文字数
+ 返り値
+	成功:TRUE	失敗:FALSE
+*/
+EXTERN int InitializeTextTexture(
+	TEXTURE_BASE* texture,
+	TEXT_DRAW* text_draw,
+	const char* utf8_text,
+	int num_character
 );
 
 #ifdef __cplusplus

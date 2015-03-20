@@ -61,35 +61,22 @@ int InitializeSimpleProgram(SIMPLE_SHADER_PROGRAM* program)
 void Display(void)
 {
 	GAME_DATA *game_data = GetGameData();
-	DRAW_VERTEX vertices[4] =
-	{
-		{{-1, 1, 0}, {0, 0}, {255, 255, 255, 255}},
-		{{-1, -1, 0}, {0, 1}, {255, 255, 255, 255}},
-		{{1, -1, 0}, {1, 1}, {255, 255, 255, 255}},
-		{{1, 1, 0}, {1, 0}, {255, 255, 255, 255}}
-	};
-	unsigned char indices[] ={0, 1, 2, 3};
+
+	SetUpStateOfOpenGL(game_data);
 
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glUseProgram(game_data->programs.draw_square.base.program_id);
 	
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, game_data->texture.id);
+	glBindTexture(GL_TEXTURE_2D, game_data->texture1.id);
 	glUniform1i(game_data->programs.draw_square.texture_uniform, 0);
 
 	glBindVertexArray(game_data->vertex_buffer.vertex_array);
-	
-	glBindBuffer(GL_ARRAY_BUFFER, game_data->vertex_buffer.vertex_buffer);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, game_data->vertex_buffer.index_buffer);
-
-	glBufferData(GL_ARRAY_BUFFER, sizeof(DRAW_VERTEX) * 4,
-		vertices, GL_DYNAMIC_DRAW);
-	
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int) * 4,
-		indices, GL_DYNAMIC_DRAW);
 
 	glDrawElements(GL_TRIANGLE_FAN, 4, GL_UNSIGNED_BYTE, NULL);
+
+	glBindVertexArray(0);
 
 	glutSwapBuffers();
 }

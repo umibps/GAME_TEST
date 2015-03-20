@@ -152,6 +152,94 @@ uint8* ReadPngStream(
 }
 
 /*
+ WritePngStream関数
+ PNGイメージデータをエンコードして書き出す
+ 引数
+ stream			: データストリーム
+ write_func		: 読み込みに使用する関数ポインタ
+ flush_func		: バッファクリア用の関数ポインタ(NULL指定可能)
+ pixels			: 画像のピクセルデータ
+ width			: 画像の幅
+ height			: 画像の高さ
+ channel		: 画像のチャンネル数
+ compression	: 圧縮レベル
+*/
+void WritePngStream(
+	void* stream,
+	size_t(*write_func)(void*, size_t, size_t, void*),
+	void(*flush_func)(void*),
+	uint8* pixels,
+	int width,
+	int height,
+	int channel,
+	int compression
+)
+{
+	PNG_IO io ={stream, write_func, flush_func};	// 書き込み実行時のデータ
+	png_structp png_p;								// PNG圧縮用のデータ
+	png_infop info_p;								// 圧縮用データに画像情報を渡すデータ
+	uint8 **pixel_arrays;							// 1次元→2次元配列用のポインタ配列
+	int color_type;									// PNGの色のタイプ
+	int stride = width * channel;					// 画像1行分のバイト数
+	int i;
+
+	// 画像のチャンネル数にあわせてカラータイプを設定
+	switch(channel)
+	{
+	case 1:
+		color_type = PNG_COLOR_TYPE_GRAY;
+		break;
+	case 2:
+		color_type = PNG_COLOR_TYPE_GRAY_ALPHA;
+		break;
+	case 3:
+		color_type = PNG_COLOR_TYPE_RGB;
+		break;
+	case 4:
+		color_type = PNG_COLOR_TYPE_RGB_ALPHA;
+		break;
+	default:
+		return;
+	}
+
+	// 書き込み用のデータを作成
+	png_p = png_create_write_struct(
+		PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+
+	// 画像情報格納用のデータを作成
+	info_p = png_create_info_struct(png_p);
+
+	// 書き込み用のストリームと関数ポインタを設定
+	png_set_write_fn(png_p, &io,
+		(png_rw_ptr)PngReadWrite, (png_flush_ptr)PngFlush);
+	// 圧縮には全てのフィルターを使用
+	png_set_filter(png_p, 0, PNG_ALL_FILTERS);
+	// 圧縮レベルを設定
+	png_set_compression_level(png_p, compression);
+
+	// PNGの情報をセット
+	png_set_IHDR(png_p, info_p, width, height, 8, color_type,
+		0, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
+
+	// pnglib用に2次元配列を作成
+	pixel_arrays = (uint8**)MEM_ALLOC_FUNC(height*sizeof(*pixel_arrays));
+	for(i=0; i<height; i++)
+	{
+		pixel_arrays[i] = &pixels[stride*i];
+	}
+
+	// 画像データの書き込み
+	png_write_info(png_p, info_p);
+	png_write_image(png_p, pixel_arrays);
+	png_write_end(png_p, info_p);
+
+	// メモリの開放
+	png_destroy_write_struct(&png_p, &info_p);
+
+	MEM_FREE_FUNC(pixel_arrays);
+}
+
+/*
  JPEG_ERROR_MANAGER構造体
  JPEGデコード中のエラーを管理
 */

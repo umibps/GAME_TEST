@@ -84,8 +84,8 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>"./include"; "./include/zlib"; "./include/png";</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>FT2_BUILD_LIBRARY;WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>"./include"; "./include/zlib"; "./include/png"; "./include/freetype";</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -114,8 +114,8 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>"./include"; "./include/zlib"; "./include/png";</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>FT2_BUILD_LIBRARY;WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>"./include"; "./include/zlib"; "./include/png"; "./include/freetype";</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -182,6 +182,44 @@
     <ClCompile Include="freeglut\mswin\fg_structure_mswin.c" />
     <ClCompile Include="freeglut\mswin\fg_window_mswin.c" />
     <ClCompile Include="freeglut\util\xparsegeometry_repl.c" />
+    <ClCompile Include="freetype\autofit\autofit.c" />
+    <ClCompile Include="freetype\base\ftbase.c" />
+    <ClCompile Include="freetype\base\ftbbox.c" />
+    <ClCompile Include="freetype\base\ftbitmap.c" />
+    <ClCompile Include="freetype\base\ftdebug.c" />
+    <ClCompile Include="freetype\base\ftfstype.c" />
+    <ClCompile Include="freetype\base\ftgasp.c" />
+    <ClCompile Include="freetype\base\ftglyph.c" />
+    <ClCompile Include="freetype\base\ftgxval.c" />
+    <ClCompile Include="freetype\base\ftinit.c" />
+    <ClCompile Include="freetype\base\ftlcdfil.c" />
+    <ClCompile Include="freetype\base\ftmm.c" />
+    <ClCompile Include="freetype\base\ftotval.c" />
+    <ClCompile Include="freetype\base\ftpfr.c" />
+    <ClCompile Include="freetype\base\ftstroke.c" />
+    <ClCompile Include="freetype\base\ftsynth.c" />
+    <ClCompile Include="freetype\base\ftsystem.c" />
+    <ClCompile Include="freetype\base\fttype1.c" />
+    <ClCompile Include="freetype\base\ftwinfnt.c" />
+    <ClCompile Include="freetype\base\ftxf86.c" />
+    <ClCompile Include="freetype\bdf\bdf.c" />
+    <ClCompile Include="freetype\cache\ftcache.c" />
+    <ClCompile Include="freetype\cff\cff.c" />
+    <ClCompile Include="freetype\cid\type1cid.c" />
+    <ClCompile Include="freetype\gzip\ftgzip.c" />
+    <ClCompile Include="freetype\lzw\ftlzw.c" />
+    <ClCompile Include="freetype\pcf\pcf.c" />
+    <ClCompile Include="freetype\pfr\pfr.c" />
+    <ClCompile Include="freetype\psaux\psaux.c" />
+    <ClCompile Include="freetype\pshinter\pshinter.c" />
+    <ClCompile Include="freetype\psnames\psmodule.c" />
+    <ClCompile Include="freetype\raster\raster.c" />
+    <ClCompile Include="freetype\sfnt\sfnt.c" />
+    <ClCompile Include="freetype\smooth\smooth.c" />
+    <ClCompile Include="freetype\truetype\truetype.c" />
+    <ClCompile Include="freetype\type1\type1.c" />
+    <ClCompile Include="freetype\type42\type42.c" />
+    <ClCompile Include="freetype\winfonts\winfnt.c" />
     <ClCompile Include="game_data.c" />
     <ClCompile Include="glew\glew.c" />
     <ClCompile Include="image_file.c" />
@@ -251,6 +289,7 @@
     <ClCompile Include="main.c" />
     <ClCompile Include="pc\display.c" />
     <ClCompile Include="shader_program.c" />
+    <ClCompile Include="text.c" />
     <ClCompile Include="texture.c" />
     <ClCompile Include="utils.c" />
     <ClCompile Include="vertex.c" />
@@ -308,6 +347,7 @@
     <ClInclude Include="libpng\pngpriv.h" />
     <ClInclude Include="libpng\pngstruct.h" />
     <ClInclude Include="shader_program.h" />
+    <ClInclude Include="text.h" />
     <ClInclude Include="texture.h" />
     <ClInclude Include="types.h" />
     <ClInclude Include="utils.h" />

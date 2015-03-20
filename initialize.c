@@ -1,3 +1,8 @@
+﻿#ifdef _MSC_VER
+// 埋め込み文字列をUTF-8にする
+# pragma execution_character_set("utf-8")
+#endif
+
 #include <stdio.h>
 #include <string.h>
 #include <stddef.h>
@@ -29,6 +34,8 @@ int InitializeGameData(int argc, char** argv)
 
 	(void)glutCreateWindow("GAME TEST");
 
+	InitializeTextDrawFromFile(&game_data->text_draw, "./font_1_honokamin.ttf");
+	TextDrawSetCharacterSize(&game_data->text_draw, 80, 80);
 
 	glutDisplayFunc((void(*)(void))Display);
 
@@ -40,10 +47,9 @@ int InitializeGameData(int argc, char** argv)
 	glClearColor(0, 0, 0, 0);
 
 	{
-		InitializeImageTexture(&game_data->texture1, "test.jpg",
-			fopen, fread, fseek, ftell, fclose, game_data);
-		InitializeImageTexture(&game_data->texture2, "test.png",
-			fopen, fread, fseek, ftell, fclose, game_data);
+		InitializeTextTexture(&game_data->texture1, &game_data->text_draw,
+			"abcgあいう漢字\n改行もできます。", -1);
+
 		InitializeSimpleProgram(&game_data->programs.draw_square);
 		InitializeVertexBuffer(
 			&game_data->vertex_buffer, sizeof(vertices), vertices,

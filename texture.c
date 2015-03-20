@@ -1,4 +1,4 @@
-#include <string.h>
+ï»¿#include <string.h>
 #include <GL/glew.h>
 #include <GL/glut.h>
 #include "texture.h"
@@ -11,17 +11,17 @@ extern "C" {
 #endif
 
 /*
- GenerateTexgtureŠÖ”
- ‰æ‘œ‚ÌƒsƒNƒZƒ‹ƒf[ƒ^‚ğ“n‚µOpenGL‚ÌƒeƒNƒXƒ`ƒƒ‚ğ¶¬‚·‚é
- ˆø”
- pixels		: ‰æ‘œ‚ÌƒsƒNƒZƒ‹ƒf[ƒ^
- width		: ‰æ‘œ‚Ì•
- height		: ‰æ‘œ‚Ì‚‚³
- channel	: ‰æ‘œ‚Ìƒ`ƒƒƒ“ƒlƒ‹”
-				(ƒOƒŒ[ƒXƒP[ƒ‹:1AƒOƒŒ[ƒXƒP[ƒ‹+ƒ¿ƒ`ƒƒƒ“ƒlƒ‹:2ARGB:3ARGBA4)
+ GenerateTexgtureé–¢æ•°
+ ç”»åƒã®ãƒ”ã‚¯ã‚»ãƒ«ãƒ‡ãƒ¼ã‚¿ã‚’æ¸¡ã—OpenGLã®ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ç”Ÿæˆã™ã‚‹
+ å¼•æ•°
+ pixels		: ç”»åƒã®ãƒ”ã‚¯ã‚»ãƒ«ãƒ‡ãƒ¼ã‚¿
+ width		: ç”»åƒã®å¹…
+ height		: ç”»åƒã®é«˜ã•
+ channel	: ç”»åƒã®ãƒãƒ£ãƒ³ãƒãƒ«æ•°
+				(ã‚°ãƒ¬ãƒ¼ã‚¹ã‚±ãƒ¼ãƒ«:1ã€ã‚°ãƒ¬ãƒ¼ã‚¹ã‚±ãƒ¼ãƒ«+Î±ãƒãƒ£ãƒ³ãƒãƒ«:2ã€RGB:3ã€RGBA4)
 
- •Ô‚è’l
-	¶¬‚³‚ê‚½ƒeƒNƒXƒ`ƒƒ‚ÌID
+ è¿”ã‚Šå€¤
+	ç”Ÿæˆã•ã‚ŒãŸãƒ†ã‚¯ã‚¹ãƒãƒ£ã®ID
  */
 GLuint GenerateTexture(
 	uint8* pixels,
@@ -30,33 +30,44 @@ GLuint GenerateTexture(
 	int channel
 )
 {
-	GLuint texture_id;		// ¶¬‚³‚ê‚½ƒeƒNƒXƒ`ƒƒ‚ÌID
+	GLuint texture_id;		// ç”Ÿæˆã•ã‚ŒãŸãƒ†ã‚¯ã‚¹ãƒãƒ£ã®ID
 
-	// OpenGL‚ÉƒeƒNƒXƒ`ƒƒ¶¬‚ğˆË—Š‚µ‚ÄID‚ğ–á‚¤
+	// OpenGLã«ãƒ†ã‚¯ã‚¹ãƒãƒ£ç”Ÿæˆã‚’ä¾é ¼ã—ã¦IDã‚’è²°ã†
 	glGenTextures(1, &texture_id);
 
-	// ID‚ª0‚È‚ç¶¬¸”s
+	// IDãŒ0ãªã‚‰ç”Ÿæˆå¤±æ•—
 	if(texture_id == 0)
 	{
 		return 0;
 	}
 
-	// ¶¬‚µ‚½ƒeƒNƒXƒ`ƒƒ‚ğŒÄ‚Ño‚µ
-		// (ƒeƒNƒXƒ`ƒƒ‚Ìİ’è‚ÆƒsƒNƒZƒ‹ƒf[ƒ^‚Ìˆø‚«“n‚µ‚ğs‚¤‚½‚ß
+	// ç”Ÿæˆã—ãŸãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’å‘¼ã³å‡ºã—
+		// (ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®è¨­å®šã¨ãƒ”ã‚¯ã‚»ãƒ«ãƒ‡ãƒ¼ã‚¿ã®å¼•ãæ¸¡ã—ã‚’è¡Œã†ãŸã‚
 	glBindTexture(GL_TEXTURE_2D, texture_id);
 
-	// ƒeƒNƒXƒ`ƒƒ‚ğŠg‘åEk¬‚µ‚½‚Æ‚«‚Ìİ’è(üŒ`•âŠÔ)
+	// ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’æ‹¡å¤§ãƒ»ç¸®å°ã—ãŸã¨ãã®è¨­å®š(ç·šå½¢è£œé–“)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-	// ‰æ‘œ‚Ìƒ`ƒƒƒ“ƒlƒ‹”‚Åˆ—‚ğØ‚è‘Ö‚¦
+	// ç”»åƒã®ãƒãƒ£ãƒ³ãƒãƒ«æ•°ã§å‡¦ç†ã‚’åˆ‡ã‚Šæ›¿ãˆ
 	switch(channel)
 	{
-	case 1:	// ƒOƒŒ[ƒXƒP[ƒ‹‚Ì‰æ‘œ‚Íƒ¿ƒ`ƒƒƒ“ƒlƒ‹‚Ì‚İ‚ÌƒeƒNƒXƒ`ƒƒ‚É‚·‚é
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, width, height, 0, GL_ALPHA,
-			GL_UNSIGNED_BYTE, pixels);
+	case 1:	// ã‚°ãƒ¬ãƒ¼ã‚¹ã‚±ãƒ¼ãƒ«ã®ç”»åƒã¯RGBAã«å¤‰æ›ã™ã‚‹(è‰²ã¯255)
+		{
+			uint8 *texture_pixels = (uint8*)MEM_ALLOC_FUNC(width*height*4);
+			int i;
+			for(i=0; i<width*height; i++)
+			{
+				texture_pixels[i*4] = texture_pixels[i*4+1] =
+					texture_pixels[i*4+2] = (pixels[i] > 0) ? 0xFF : 0x00;
+				texture_pixels[i*4+3] = pixels[i];
+			}
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA,
+				GL_UNSIGNED_BYTE, texture_pixels);
+			MEM_FREE_FUNC(texture_pixels);
+		}
 		break;
-	case 2:	// ƒOƒŒ[ƒXƒP[ƒ‹+ƒ¿ƒ`ƒƒƒ“ƒlƒ‹‚Ì‰æ‘œ‚ÍRGBA‚É•ÏŠ·‚·‚é
+	case 2:	// ã‚°ãƒ¬ãƒ¼ã‚¹ã‚±ãƒ¼ãƒ«+Î±ãƒãƒ£ãƒ³ãƒãƒ«ã®ç”»åƒã¯RGBAã«å¤‰æ›ã™ã‚‹
 		{
 			uint8 *texture_pixels = (uint8*)MEM_ALLOC_FUNC(width*height*4);
 			int i;
@@ -74,35 +85,35 @@ GLuint GenerateTexture(
 			MEM_FREE_FUNC(texture_pixels);
 		}
 		break;
-	case 3:	// RGB‚Ì‰æ‘œƒf[ƒ^‚Í‚»‚Ì‚Ü‚ÜƒeƒNƒXƒ`ƒƒ‚É‚·‚é
+	case 3:	// RGBã®ç”»åƒãƒ‡ãƒ¼ã‚¿ã¯ãã®ã¾ã¾ãƒ†ã‚¯ã‚¹ãƒãƒ£ã«ã™ã‚‹
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB,
 			GL_UNSIGNED_BYTE, pixels);
 		break;
-	case 4:	// RGBA‚Ì‰æ‘œƒf[ƒ^‚à‚»‚Ì‚Ü‚ÜƒeƒNƒXƒ`ƒƒ‚É‚·‚é
+	case 4:	// RGBAã®ç”»åƒãƒ‡ãƒ¼ã‚¿ã‚‚ãã®ã¾ã¾ãƒ†ã‚¯ã‚¹ãƒãƒ£ã«ã™ã‚‹
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA,
 			GL_UNSIGNED_BYTE, pixels);
 		break;
-	default:	// ‚»‚êˆÈŠO‚ÌƒtƒH[ƒ}ƒbƒg‚Í–¢‘Î‰
+	default:	// ãã‚Œä»¥å¤–ã®ãƒ•ã‚©ãƒ¼ãƒãƒƒãƒˆã¯æœªå¯¾å¿œ
 		glDeleteTextures(1, &texture_id);
 		return 0;
 	}
 
-	// ƒeƒNƒXƒ`ƒƒ‚ÌŒÄ‚Ño‚µ‚ğI—¹
+	// ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®å‘¼ã³å‡ºã—ã‚’çµ‚äº†
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	return texture_id;
 }
 
 /*
- InitializeTexture2DŠÖ”
- 2DƒeƒNƒXƒ`ƒƒ‚ğ¶¬‚µ‰Šú‰»‚·‚é
- ˆø”
- texture	: ƒeƒNƒXƒ`ƒƒ‚ÌŠî–{ƒf[ƒ^\‘¢‘Ì
- pixels		: ƒeƒNƒXƒ`ƒƒ‚É‚·‚é‰æ‘œ‚ÌƒsƒNƒZƒ‹ƒf[ƒ^
- width		: ‰æ‘œ‚Ì•
- height		: ‰æ‘œ‚Ì‚‚³
- channel	: ‰æ‘œ‚Ìƒ`ƒƒƒ“ƒlƒ‹”
-				(ƒOƒŒ[ƒXƒP[ƒ‹:1AƒOƒŒ[ƒXƒP[ƒ‹+ƒ¿ƒ`ƒƒƒ“ƒlƒ‹:2ARGB:3ARGBA4)
+ InitializeTexture2Dé–¢æ•°
+ 2Dãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ç”Ÿæˆã—åˆæœŸåŒ–ã™ã‚‹
+ å¼•æ•°
+ texture	: ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®åŸºæœ¬ãƒ‡ãƒ¼ã‚¿æ§‹é€ ä½“
+ pixels		: ãƒ†ã‚¯ã‚¹ãƒãƒ£ã«ã™ã‚‹ç”»åƒã®ãƒ”ã‚¯ã‚»ãƒ«ãƒ‡ãƒ¼ã‚¿
+ width		: ç”»åƒã®å¹…
+ height		: ç”»åƒã®é«˜ã•
+ channel	: ç”»åƒã®ãƒãƒ£ãƒ³ãƒãƒ«æ•°
+				(ã‚°ãƒ¬ãƒ¼ã‚¹ã‚±ãƒ¼ãƒ«:1ã€ã‚°ãƒ¬ãƒ¼ã‚¹ã‚±ãƒ¼ãƒ«+Î±ãƒãƒ£ãƒ³ãƒãƒ«:2ã€RGB:3ã€RGBA4)
 */
 void InitializeTexture2D(
 	TEXTURE_BASE* texture,
@@ -122,10 +133,10 @@ void InitializeTexture2D(
 }
 
 /*
- ReleaseTexture2DŠÖ”
- 2DƒeƒNƒXƒ`ƒƒ‚ğŠJ•ú‚·‚é
- ˆø”
- texture	: ƒeƒNƒXƒ`ƒƒ‚ÌŠî–{ƒf[ƒ^\‘¢‘Ì
+ ReleaseTexture2Dé–¢æ•°
+ 2Dãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’é–‹æ”¾ã™ã‚‹
+ å¼•æ•°
+ texture	: ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®åŸºæœ¬ãƒ‡ãƒ¼ã‚¿æ§‹é€ ä½“
 */
 void ReleaseTexture2D(TEXTURE_BASE* texture)
 {
@@ -134,19 +145,19 @@ void ReleaseTexture2D(TEXTURE_BASE* texture)
 }
 
 /*
- InitializeImageTextureŠÖ”
- ‰æ‘œƒtƒ@ƒCƒ‹‚ğŠJ‚«AƒeƒNƒXƒ`ƒƒ‚ğ¶¬‚·‚é
- ˆø”
- texture	: ƒeƒNƒXƒ`ƒƒ‚ÌŠî–{ƒf[ƒ^\‘¢‘Ì
- path		: ƒtƒ@ƒCƒ‹ƒpƒX
- open_func	: ƒtƒ@ƒCƒ‹‚ğŠJ‚­‚Ì‚Ég‚¤ŠÖ”ƒ|ƒCƒ“ƒ^
- read_fucn	: ƒtƒ@ƒCƒ‹‚Ì“Ç‚İ‚İ‚Ég‚¤ŠÖ”ƒ|ƒCƒ“ƒ^
- seek_func	: ƒtƒ@ƒCƒ‹‚ÌƒV[ƒN‚Ég‚¤ŠÖ”ƒ|ƒCƒ“ƒ^
- tell_func	: ƒtƒ@ƒCƒ‹‚ÌƒV[ƒNˆÊ’uæ“¾‚Ég‚¤ŠÖ”ƒ|ƒCƒ“ƒ^
- close_func	: ƒtƒ@ƒCƒ‹‚ğ•Â‚¶‚é‚Ì‚Ég‚¤ŠÖ”ƒ|ƒCƒ“ƒ^
- user_data	: ƒtƒ@ƒCƒ‹‘€ì‚Ég‚¢‚½‚¢ƒ†[ƒU[’è‹`ƒf[ƒ^
- •Ô‚è’l
-	¬Œ÷:TRUE	¸”s:FALSE
+ InitializeImageTextureé–¢æ•°
+ ç”»åƒãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‹ãã€ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ç”Ÿæˆã™ã‚‹
+ å¼•æ•°
+ texture	: ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®åŸºæœ¬ãƒ‡ãƒ¼ã‚¿æ§‹é€ ä½“
+ path		: ãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ã‚¹
+ open_func	: ãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‹ãã®ã«ä½¿ã†é–¢æ•°ãƒã‚¤ãƒ³ã‚¿
+ read_fucn	: ãƒ•ã‚¡ã‚¤ãƒ«ã®èª­ã¿è¾¼ã¿ã«ä½¿ã†é–¢æ•°ãƒã‚¤ãƒ³ã‚¿
+ seek_func	: ãƒ•ã‚¡ã‚¤ãƒ«ã®ã‚·ãƒ¼ã‚¯ã«ä½¿ã†é–¢æ•°ãƒã‚¤ãƒ³ã‚¿
+ tell_func	: ãƒ•ã‚¡ã‚¤ãƒ«ã®ã‚·ãƒ¼ã‚¯ä½ç½®å–å¾—ã«ä½¿ã†é–¢æ•°ãƒã‚¤ãƒ³ã‚¿
+ close_func	: ãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‰ã˜ã‚‹ã®ã«ä½¿ã†é–¢æ•°ãƒã‚¤ãƒ³ã‚¿
+ user_data	: ãƒ•ã‚¡ã‚¤ãƒ«æ“ä½œæ™‚ã«ä½¿ã„ãŸã„ãƒ¦ãƒ¼ã‚¶ãƒ¼å®šç¾©ãƒ‡ãƒ¼ã‚¿
+ è¿”ã‚Šå€¤
+	æˆåŠŸ:TRUE	å¤±æ•—:FALSE
 */
 int InitializeImageTexture(
 	TEXTURE_BASE* texture,
@@ -159,22 +170,22 @@ int InitializeImageTexture(
 	void* user_data
 )
 {
-	const char *extention;	// Šg’£q
-	const char *str;		// •¶š—ñ‚ÌQÆˆÊ’u
-	void *stream;			// ‰æ‘œ“Ç‚İ‚İ—pƒXƒgƒŠ[ƒ€
-	uint8 *pixels = NULL;	// ‰æ‘œ‚ÌƒsƒNƒZƒ‹ƒf[ƒ^
-	int width;				// ‰æ‘œ‚Ì•
-	int height;				// ‰æ‘œ‚Ì‚‚³
-	int channel;			// ‰æ‘œ‚Ìƒ`ƒƒƒ“ƒlƒ‹”
+	const char *extention;	// æ‹¡å¼µå­
+	const char *str;		// æ–‡å­—åˆ—ã®å‚ç…§ä½ç½®
+	void *stream;			// ç”»åƒèª­ã¿è¾¼ã¿ç”¨ã‚¹ãƒˆãƒªãƒ¼ãƒ 
+	uint8 *pixels = NULL;	// ç”»åƒã®ãƒ”ã‚¯ã‚»ãƒ«ãƒ‡ãƒ¼ã‚¿
+	int width;				// ç”»åƒã®å¹…
+	int height;				// ç”»åƒã®é«˜ã•
+	int channel;			// ç”»åƒã®ãƒãƒ£ãƒ³ãƒãƒ«æ•°
 
-	// ƒtƒ@ƒCƒ‹‚ğŠJ‚­
+	// ãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‹ã
 	stream = open_func(path, "rb", user_data);
 	if(stream == NULL)
-	{	// ƒtƒ@ƒCƒ‹ƒI[ƒvƒ“¸”s
+	{	// ãƒ•ã‚¡ã‚¤ãƒ«ã‚ªãƒ¼ãƒ—ãƒ³å¤±æ•—
 		return FALSE;
 	}
 
-	// Šg’£q‚ğæ“¾
+	// æ‹¡å¼µå­ã‚’å–å¾—
 	extention = str = path;
 	while(*str != '\0')
 	{
@@ -186,7 +197,7 @@ int InitializeImageTexture(
 		str++;
 	}
 
-	// ‰æ‘œƒf[ƒ^‚ğƒfƒR[ƒh‚·‚é
+	// ç”»åƒãƒ‡ãƒ¼ã‚¿ã‚’ãƒ‡ã‚³ãƒ¼ãƒ‰ã™ã‚‹
 	if(StringCompareIgnoreCase(extention, ".png") == 0)
 	{
 		pixels = ReadPngStream(stream, read_func,
@@ -209,14 +220,48 @@ int InitializeImageTexture(
 		return FALSE;
 	}
 
-	// OpenGL‚ÌƒeƒNƒXƒ`ƒƒ‚ğ¶¬
+	// OpenGLã®ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ç”Ÿæˆ
 	InitializeTexture2D(texture, pixels, width, height, channel);
 
-	// ƒƒ‚ƒŠ‚ğŠJ•ú
+	// ãƒ¡ãƒ¢ãƒªã‚’é–‹æ”¾
 	MEM_FREE_FUNC(pixels);
 	(void)close_func(stream, user_data);
 
 	return texture->id != 0;
+}
+
+/*
+ InitializeTextTextureé–¢æ•°
+ ãƒ†ã‚­ã‚¹ãƒˆã®ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ç”Ÿæˆã™ã‚‹
+ å¼•æ•°
+ texture		: ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®åŸºæœ¬ãƒ‡ãƒ¼ã‚¿æ§‹é€ ä½“
+ text_draw		: ãƒ†ã‚­ã‚¹ãƒˆã®æç”»ã‚’ç®¡ç†ã™ã‚‹ãƒ‡ãƒ¼ã‚¿
+ utf8_text		: æç”»ã™ã‚‹ãƒ†ã‚­ã‚¹ãƒˆ
+ num_character	: æç”»ã™ã‚‹æ–‡å­—æ•°
+ è¿”ã‚Šå€¤
+	æˆåŠŸ:TRUE	å¤±æ•—:FALSE
+*/
+int InitializeTextTexture(
+	TEXTURE_BASE* texture,
+	TEXT_DRAW* text_draw,
+	const char* utf8_text,
+	int num_character
+)
+{
+	uint8 *pixels;	// æç”»çµæœã®ãƒ”ã‚¯ã‚»ãƒ«ãƒ‡ãƒ¼ã‚¿
+	int width;		// æç”»çµæœã®å¹…
+	int height;		// æç”»çµæœã®é«˜ã•
+
+	pixels = TextDrawRender(text_draw, utf8_text, num_character,
+		&width, &height);
+	if(pixels != NULL)
+	{
+		InitializeTexture2D(texture, pixels, width, height, 1);
+		MEM_FREE_FUNC(pixels);
+		return texture->id != 0;
+	}
+
+	return FALSE;
 }
 
 #ifdef __cplusplus

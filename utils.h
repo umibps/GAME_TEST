@@ -20,6 +20,16 @@ extern "C" {
 EXTERN int StringCompareIgnoreCase(const char* str1, const char* str2);
 
 /*
+ GetNextUtf8Character関数
+ 次のUTF8の文字を取得する
+ 引数
+ str	: 次の文字を取得したい文字列
+ 返り値
+	次の文字のアドレス
+*/
+EXTERN const char* GetNextUtf8Character(const char* str);
+
+/*
  FileOpen関数
  ファイルを開く
  引数

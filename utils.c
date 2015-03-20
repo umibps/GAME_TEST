@@ -52,7 +52,7 @@ const char* GetNextUtf8Character(const char* str)
 		3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 1, 1
 	};
 
-	return str + skips[*str];
+	return str + skips[((unsigned char)*str)];
 }
 
 /*
