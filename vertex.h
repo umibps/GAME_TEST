@@ -18,6 +18,16 @@ typedef struct _VERTEX_BUFFER
 } VERTEX_BUFFER;
 
 /*
+ DRAW_SQUARE_VERTEX構造体
+ 画像全体を使って描画する場合の頂点データの構造
+*/
+typedef struct _DRAW_SQUARE_VERTEX
+{
+	float position[3];				// 描画する座標(XYZ)
+	float texture_coordinate[2];	// 貼り付けるテクスチャの座標(UV)
+} DRAW_SQUARE_VERTEX;
+
+/*
  DRAW_VERTEX構造体
  描画時の頂点データの構造
 */

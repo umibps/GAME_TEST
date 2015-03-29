@@ -5,6 +5,7 @@
 #include <GL/glut.h>
 #include "types.h"
 #include "text.h"
+#include "utils.h"
 
 /*
  TEXTURE_BASE構造体
@@ -12,12 +13,23 @@
 */
 typedef struct _TEXTURE_BASE
 {
-	GLuint id;		// テクスチャのID
-	GLenum type;	// テクスチャのタイプ(1D or 2D or 3D)
-	int width;		// テクスチャ画像の幅
-	int height;		// テクスチャ画像の高さ
-	int channel;	// テクスチャ画像のチャンネル数
+	GLuint id;				// テクスチャのID
+	char *file_path;		// 画像ファイルのパス
+	GLenum type;			// テクスチャのタイプ(1D or 2D or 3D)
+	int width;				// テクスチャ画像の幅
+	int height;				// テクスチャ画像の高さ
+	int channel;			// テクスチャ画像のチャンネル数
+	int reference_count;	// 参照カウント
 } TEXTURE_BASE;
+
+/*
+ TEXTURES構造体
+ プログラム全体で保持しているテクスチャを管理
+*/
+typedef struct _IMAGE_TEXTURES
+{
+	STRING_HASH_TABLE hash_table;	// ハッシュテーブルでダブリ防止
+} IMAGE_TEXTURES;
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,6 +59,7 @@ EXTERN GLuint GenerateTexture(
  2Dテクスチャを生成し初期化する
  引数
  texture	: テクスチャの基本データ構造体
+ file_path	: 画像ファイルのパス
  pixels		: テクスチャにする画像のピクセルデータ
  width		: 画像の幅
  height		: 画像の高さ
@@ -56,10 +69,19 @@ EXTERN GLuint GenerateTexture(
 EXTERN void InitializeTexture2D(
 	TEXTURE_BASE* texture,
 	uint8* pixels,
+	const char* file_path,
 	int width,
 	int height,
 	int channel
 );
+
+/*
+ DeleteTexture2D関数
+ 2Dテクスチャを削除する
+ 引数
+ texthre	: 削除するテクスチャ
+*/
+EXTERN void DeleteTexture2D(TEXTURE_BASE* texture);
 
 /*
  InitializeImageTexture関数
@@ -104,6 +126,38 @@ EXTERN int InitializeTextTexture(
 	const char* utf8_text,
 	int num_character
 );
+
+/*
+ ImageTextureNew関数
+ 画像ファイルからテクスチャをダブり防止して作成する
+ 引数
+*/
+EXTERN TEXTURE_BASE* ImageTextureNew(
+	const char* path,
+	void* (*open_func)(const char*, const char*, void*),
+	size_t(*read_func)(void*, size_t, size_t, void*),
+	int(*seek_func)(void*, long, int),
+	long(*tell_func)(void*),
+	int(*close_func)(void*, void*),
+	void* user_data,
+	IMAGE_TEXTURES* textures
+);
+
+/*
+ InitializeImageTextures関数
+ テクスチャ全体を管理するデータを初期化
+ 引数
+ textures	: テクスチャ全体を管理するデータ
+*/
+EXTERN void InitializeImageTextures(IMAGE_TEXTURES* textures);
+
+/*
+ ReleaseImageTextures関数
+ テクスチャ全体を管理するデータを開放
+ 引数
+ textures	: テクスチャ全体を管理するデータ
+*/
+EXTERN void ReleaseImageTextures(IMAGE_TEXTURES* textures);
 
 #ifdef __cplusplus
 }

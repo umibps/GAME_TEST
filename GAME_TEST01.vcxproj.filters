@@ -573,6 +573,24 @@
     <ClCompile Include="text.c">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="draw_item.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="main_loop.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="task.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="task_common.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="pc\input.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="input_common.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="freeglut\mswin\fg_internal_mswin.h">
@@ -701,9 +719,6 @@
     <ClInclude Include="configure.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="utils.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="vertex.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -717,6 +732,24 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="text.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="draw_item.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="utils.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="main_loop.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="task.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="task_common.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="input.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

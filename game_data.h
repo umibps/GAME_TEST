@@ -6,6 +6,10 @@
 #include "texture.h"
 #include "display.h"
 #include "text.h"
+#include "draw_item.h"
+#include "input.h"
+#include "task.h"
+#include "utils.h"
 
 /*
  GAME_DATA構造体
@@ -13,11 +17,9 @@
 */
 struct _GAME_DATA
 {
-	DISPLAY_PROGRAMS programs;
-	TEXTURE_BASE texture1, texture2, texture3;
-	DRAW_VERTEX vertex;
-	VERTEX_BUFFER vertex_buffer;
-	TEXT_DRAW text_draw;
+	DISPLAY_DATA display_data;	// 描画用のデータ
+	TASKS tasks;				// タスク実行用のデータ
+	GAME_INPUT input;			// 入力処理用のデータ
 };
 
 #ifdef __cplusplus

@@ -144,6 +144,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="display_common.c" />
+    <ClCompile Include="draw_item.c" />
     <ClCompile Include="freeglut\fg_callbacks.c" />
     <ClCompile Include="freeglut\fg_cursor.c" />
     <ClCompile Include="freeglut\fg_display.c" />
@@ -224,6 +225,7 @@
     <ClCompile Include="glew\glew.c" />
     <ClCompile Include="image_file.c" />
     <ClCompile Include="initialize.c" />
+    <ClCompile Include="input_common.c" />
     <ClCompile Include="libjpeg\cdjpeg.c" />
     <ClCompile Include="libjpeg\jaricom.c" />
     <ClCompile Include="libjpeg\jcapimin.c" />
@@ -287,8 +289,12 @@
     <ClCompile Include="libpng\pngwtran.c" />
     <ClCompile Include="libpng\pngwutil.c" />
     <ClCompile Include="main.c" />
+    <ClCompile Include="main_loop.c" />
     <ClCompile Include="pc\display.c" />
+    <ClCompile Include="pc\input.c" />
     <ClCompile Include="shader_program.c" />
+    <ClCompile Include="task.c" />
+    <ClCompile Include="task_common.c" />
     <ClCompile Include="text.c" />
     <ClCompile Include="texture.c" />
     <ClCompile Include="utils.c" />
@@ -317,6 +323,7 @@
   <ItemGroup>
     <ClInclude Include="configure.h" />
     <ClInclude Include="display.h" />
+    <ClInclude Include="draw_item.h" />
     <ClInclude Include="freeglut\fg_gl2.h" />
     <ClInclude Include="freeglut\fg_init.h" />
     <ClInclude Include="freeglut\fg_internal.h" />
@@ -330,6 +337,7 @@
     <ClInclude Include="include\GL\glxew.h" />
     <ClInclude Include="include\GL\wglew.h" />
     <ClInclude Include="initialize.h" />
+    <ClInclude Include="input.h" />
     <ClInclude Include="libjpeg\jconfig.h" />
     <ClInclude Include="libjpeg\jdct.h" />
     <ClInclude Include="libjpeg\jerror.h" />
@@ -346,7 +354,10 @@
     <ClInclude Include="libpng\pnglibconf.h" />
     <ClInclude Include="libpng\pngpriv.h" />
     <ClInclude Include="libpng\pngstruct.h" />
+    <ClInclude Include="main_loop.h" />
     <ClInclude Include="shader_program.h" />
+    <ClInclude Include="task.h" />
+    <ClInclude Include="task_common.h" />
     <ClInclude Include="text.h" />
     <ClInclude Include="texture.h" />
     <ClInclude Include="types.h" />

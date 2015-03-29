@@ -62,6 +62,9 @@ int InitializeTextDrawFromMemory(
 
 	(void)memset(text_draw, 0, sizeof(*text_draw));
 
+	text_draw->text_image.font_data.buffer = (uint8*)MEM_ALLOC_FUNC(font_data_size);
+	(void)memcpy(text_draw->text_image.font_data.buffer, font_data, font_data_size);
+
 	// FreeTypeの初期化
 	FT_Init_FreeType(&text_draw->text_image.library);
 	// フォントのデータをロード
@@ -287,7 +290,11 @@ uint8* TextDrawRender(
 		}
 
 		// 描画実施
-		(void)FT_Load_Char(text_draw->text_image.face, code, FT_LOAD_RENDER);
+		if(FT_Load_Char(text_draw->text_image.face, code, FT_LOAD_RENDER) != 0)
+		{	// 失敗したら何もせずに次の文字へ
+			str = next;
+			continue;
+		}
 
 		// 描画結果をコピーする
 		dst = &work_pixels[(local_height+text_draw->height-slot->bitmap_top)*stride + local_width + slot->bitmap_left];

@@ -10,6 +10,10 @@
 #include <GL/glut.h>
 #include "game_data.h"
 #include "display.h"
+#include "main_loop.h"
+#include "utils.h"
+#include "task_common.h"
+#include "configure.h"
 
 int InitializeGameData(int argc, char** argv)
 {
@@ -34,10 +38,16 @@ int InitializeGameData(int argc, char** argv)
 
 	(void)glutCreateWindow("GAME TEST");
 
-	InitializeTextDrawFromFile(&game_data->text_draw, "./font_1_honokamin.ttf");
-	TextDrawSetCharacterSize(&game_data->text_draw, 80, 80);
+	InitializeTextDrawFromFile(&game_data->display_data.text_draw, "./font_1_honokamin.ttf");
+	TextDrawSetCharacterSize(&game_data->display_data.text_draw, 80, 80);
 
 	glutDisplayFunc((void(*)(void))Display);
+	glutReshapeFunc((void(*)(int, int))ReshapeWindow);
+	glutTimerFunc(1000 / FRAMES_PER_SECOND,
+		(void (*)(int))TimerCallback, 0);
+
+	SetInputCallbacks();
+	LoadDefaultInputSettings(&game_data->input);
 
 	if(glewInit() != GLEW_OK)
 	{
@@ -46,17 +56,58 @@ int InitializeGameData(int argc, char** argv)
 
 	glClearColor(0, 0, 0, 0);
 
-	{
-		InitializeTextTexture(&game_data->texture1, &game_data->text_draw,
-			"abcgあいう漢字\n改行もできます。", -1);
+	InitializeDisplayData(&game_data->display_data);
 
-		InitializeSimpleProgram(&game_data->programs.draw_square);
-		InitializeVertexBuffer(
-			&game_data->vertex_buffer, sizeof(vertices), vertices,
-			sizeof(indices), indices, sizeof(DRAW_VERTEX),
-			3, SHADER_ATTRIBUTE_VERTEX, GL_FLOAT, GL_FALSE, 0,
-			2, SHADER_ATTRIBUTE_TEXTURE_COORD, GL_FLOAT, GL_FALSE, offsetof(DRAW_VERTEX, texture_coord),
-			4, SHADER_ATTRIBUTE_COLOR, GL_UNSIGNED_BYTE, GL_TRUE, offsetof(DRAW_VERTEX, color),
+	InitializeTasks(&game_data->tasks, game_data);
+	(void)TaskNew(&game_data->tasks,
+		(void (*)(TASK*))TaskTop,
+		NULL,
+		0x00000000,
+		0
+	);
+	(void)TaskNew(&game_data->tasks,
+		(void (*)(TASK*))TaskBottom,
+		NULL,
+		0xFFFFFFFF,
+		0
+	);
+
+	{
+		/*
+		PriorityArrayAppend(&game_data->display_data.draw_items,
+			DrawSquareItemNew(
+			ImageTextureNew("test.jpg",
+				FileOpen, fread, fseek, ftell, FileClose, game_data, &game_data->display_data.textures),
+			0, 0,
+			0.33f,
+			0,
+			RGBA(0xFF, 0xFF, 0xFF, 0xFF),
+			&game_data->display_data.programs),
+			0
+		);
+		*/
+
+		PriorityArrayAppend(&game_data->display_data.draw_items,
+			DrawSquareItemNew(
+			ImageTextureNew("test.png",
+				FileOpen, fread, fseek, ftell, FileClose, game_data, &game_data->display_data.textures),
+			300, 260,
+			2,
+			0,
+			RGBA(0xFF, 0xFF, 0xFF, 0xFF),
+			&game_data->display_data.programs),
+			0
+		);
+
+		PriorityArrayAppend(&game_data->display_data.draw_items,
+			DrawSquareItemNew(
+			ImageTextureNew("flame.png",
+				FileOpen, fread, fseek, ftell, FileClose, game_data, &game_data->display_data.textures),
+			500, 260,
+			1,
+			0,
+			RGBA(0xFF, 0xFF, 0xFF, 0xFF),
+			&game_data->display_data.programs),
 			0
 		);
 	}

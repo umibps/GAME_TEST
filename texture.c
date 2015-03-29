@@ -109,6 +109,7 @@ GLuint GenerateTexture(
  2Dテクスチャを生成し初期化する
  引数
  texture	: テクスチャの基本データ構造体
+ file_path	: 画像ファイルのパス
  pixels		: テクスチャにする画像のピクセルデータ
  width		: 画像の幅
  height		: 画像の高さ
@@ -118,6 +119,7 @@ GLuint GenerateTexture(
 void InitializeTexture2D(
 	TEXTURE_BASE* texture,
 	uint8* pixels,
+	const char* file_path,
 	int width,
 	int height,
 	int channel
@@ -126,6 +128,10 @@ void InitializeTexture2D(
 	(void)memset(texture, 0, sizeof(*texture));
 
 	texture->id = GenerateTexture(pixels, width, height, channel);
+	if(file_path != 0)
+	{
+		texture->file_path = MEM_STRDUP_FUNC(file_path);
+	}
 	texture->type = GL_TEXTURE_2D;
 	texture->width = width;
 	texture->height = height;
@@ -140,8 +146,29 @@ void InitializeTexture2D(
 */
 void ReleaseTexture2D(TEXTURE_BASE* texture)
 {
-	glDeleteTextures(1, &texture->id);
-	texture->id = 0;
+	texture->reference_count--;
+	if(texture->file_path == NULL
+		|| texture->reference_count <= 0)
+	{
+		glDeleteTextures(1, &texture->id);
+		texture->id = 0;
+		texture->reference_count = 0;
+	}
+}
+
+/*
+ DeleteTexture2D関数
+ 2Dテクスチャを削除する
+ 引数
+ texthre	: 削除するテクスチャ
+*/
+void DeleteTexture2D(TEXTURE_BASE* texture)
+{
+	ReleaseTexture2D(texture);
+	if(texture->id == 0)
+	{
+		MEM_FREE_FUNC(texture);
+	}
 }
 
 /*
@@ -221,13 +248,46 @@ int InitializeImageTexture(
 	}
 
 	// OpenGLのテクスチャを生成
-	InitializeTexture2D(texture, pixels, width, height, channel);
+	InitializeTexture2D(texture, pixels, path, width, height, channel);
 
 	// メモリを開放
 	MEM_FREE_FUNC(pixels);
 	(void)close_func(stream, user_data);
 
 	return texture->id != 0;
+}
+
+/*
+ ImageTextureNew関数
+ 画像ファイルからテクスチャをダブり防止して作成する
+ 引数
+*/
+TEXTURE_BASE* ImageTextureNew(
+	const char* path,
+	void* (*open_func)(const char*, const char*, void*),
+	size_t(*read_func)(void*, size_t, size_t, void*),
+	int(*seek_func)(void*, long, int),
+	long(*tell_func)(void*),
+	int(*close_func)(void*, void*),
+	void* user_data,
+	IMAGE_TEXTURES* textures
+)
+{
+	TEXTURE_BASE *texture;
+
+	if((texture = StringHashTableGet(&textures->hash_table, path)) != NULL)
+	{
+		texture->reference_count++;
+		return texture;
+	}
+
+	texture = (TEXTURE_BASE*)MEM_ALLOC_FUNC(sizeof(*texture));
+	InitializeImageTexture(texture, path, open_func, read_func,
+		seek_func, tell_func, close_func, user_data);
+	StringHashTableAppend(&textures->hash_table,
+		path, texture);
+
+	return texture;
 }
 
 /*
@@ -256,12 +316,35 @@ int InitializeTextTexture(
 		&width, &height);
 	if(pixels != NULL)
 	{
-		InitializeTexture2D(texture, pixels, width, height, 1);
+		InitializeTexture2D(texture, pixels, NULL, width, height, 1);
 		MEM_FREE_FUNC(pixels);
 		return texture->id != 0;
 	}
 
 	return FALSE;
+}
+
+/*
+ InitializeImageTextures関数
+ テクスチャ全体を管理するデータを初期化
+ 引数
+ textures	: テクスチャ全体を管理するデータ
+*/
+void InitializeImageTextures(IMAGE_TEXTURES* textures)
+{
+	InitializeStringHashTable(&textures->hash_table, 1024,
+		(void(*)(void*))DeleteTexture2D);
+}
+
+/*
+ ReleaseImageTextures関数
+ テクスチャ全体を管理するデータを開放
+ 引数
+ textures	: テクスチャ全体を管理するデータ
+*/
+void ReleaseImageTextures(IMAGE_TEXTURES* textures)
+{
+	ReleaseStringHashTable(&textures->hash_table);
 }
 
 #ifdef __cplusplus

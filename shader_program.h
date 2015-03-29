@@ -4,8 +4,11 @@
 #include <GL/glew.h>
 #include <GL/glut.h>
 #include "types.h"
+#include "vertex.h"
 
 /*
+ eSHADER_ATTRIBUTE列挙体
+ 頂点バッファの属性定数
 */
 typedef enum _eSHADER_ATTRIBUTE
 {
@@ -24,23 +27,51 @@ typedef struct _SHADER_PROGRAM_BASE
 } SHADER_PROGRAM_BASE;
 
 /*
+ DRAW_SQUARE_PROGRAM構造体
+ 画像全体を使って描画する場合のデータ
 */
 typedef struct _DRAW_SQUARE_PROGRAM
 {
-	SHADER_PROGRAM_BASE base_data;			// シェーダープログラムの基本データ
-	GLint texture_size_uniform_location;	// テクスチャ画像のサイズを入れる
-											// シェーダープログラムの変数識別ID
-	GLint display_size_unifrom_location;	// 画面サイズを入れる
-											// シェーダープログラムの変数識別ID
-	GLint zoom_uniform_location;			// X方向及びY方向の拡大率を入れる
-											// シェーダープログラムの変数識別ID
-	GLint rotate_uniform_location;			// 画像の回転角を入れる
-											// シェーダープログラムの変数識別ID
+	SHADER_PROGRAM_BASE base_data;						// シェーダープログラムの基本データ
+	VERTEX_BUFFER vertex_buffer;						// (0, 1)のみの頂点バッファ
+	GLint position_uniform_location;					// 描画する座標を入れる
+														// 頂点シェーダープログラムの変数識別ID
+	GLint texture_size_uniform_location;				// テクスチャ画像のサイズを入れる
+														// 頂点シェーダープログラムの変数識別ID
+	GLint reverse_half_display_size_unifrom_location;	// 画像サイズと指定座標からOpenGLでの座標を計算する
+														// 頂点シェーダープログラムの変数識別ID
+	GLint display_height_uniform_location;				// 描画領域の高さを指定する
+														// 頂点シェーダープログラムの変数識別ID
+	GLint zoom_uniform_location;						// X方向及びY方向の拡大率を入れる
+														// 頂点シェーダープログラムの変数識別ID
+	GLint rotate_uniform_location;						// 画像の回転角を入れる
+														// 頂点シェーダープログラムの変数識別ID
+	GLint color_uniform_location;						// 画像の色を指定する
+														// フラグメントシェーダープログラムの変数識別ID
+	GLint texture_uniform_location;						// 使用するテクスチャユニットのIDを指定する
+														// フラグメントシェーダープログラムの変数識別ID
 } DRAW_SQUARE_PROGRAM;
+
+/*
+ DISPLAY_PROGRAMS構造体
+ 使用するシェーダープログラムの集合体
+*/
+typedef struct _DISPLAY_PROGRAMS
+{
+	DRAW_SQUARE_PROGRAM draw_square;
+} DISPLAY_PROGRAMS;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/*
+ InitializeDisplayPrograms関数
+ 描画に使うシェーダーの全てを初期化する
+ 引数
+ programs	: シェーダー全体を管理するデータ
+*/
+EXTERN void InitializeDisplayPrograms(DISPLAY_PROGRAMS* programs);
 
 /*
  GenerateGlslProgram関数
@@ -93,6 +124,38 @@ EXTERN int InitializeShaderProgram(
 	const char* first_attribute,
 	...
 );
+
+/*
+ InitializeDrawSquareProgram関数
+ 画像全体を使って描画するシェーダープログラムの初期化
+ 引数
+ program		: シェーダーを管理するデータ
+ display_width	: 描画領域の幅
+ display_height	: 描画領域の高さ
+ 返り値
+	成功:TRUE	失敗:FALSE
+*/
+EXTERN int InitializeDrawSquareProgram(
+	DRAW_SQUARE_PROGRAM* program,
+	float display_width,
+	float display_height
+);
+
+/*
+ DrawSquareProgramSetUniformLocation関数
+ シェーダーオブジェクトからuniform属性の変数のIDを取得する
+ 引数
+ program	: シェーダーを管理するデータ
+*/
+EXTERN void DrawSquareProgramSetUniformLocation(DRAW_SQUARE_PROGRAM* program);
+
+/*
+ InitializeDisplayPrograms関数
+ 描画に使うシェーダーの全てを初期化する
+ 引数
+ programs	: シェーダー全体を管理するデータ
+*/
+EXTERN void InitializeDisplayPrograms(DISPLAY_PROGRAMS* programs);
 
 #ifdef __cplusplus
 }

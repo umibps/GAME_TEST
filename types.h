@@ -56,6 +56,12 @@ typedef float FLOAT_T;
 # define TRUE !(FALSE)
 #endif
 
+#ifndef M_PI
+# define M_PI 3.1415926535897932384626433832795
+#endif
+
+#define DIV_PIXEL ((FLOAT_T)0.00392157f)
+
 typedef struct _GAME_DATA GAME_DATA;
 
 #endif	// #ifndef _INCLUDE_TYPES_H_
