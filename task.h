@@ -70,7 +70,7 @@ EXTERN void DeleteTask(TASK* task);
  TaskChangePriroity関数
  タスクの実行優先度を変更する
  引数
- task			: 
+ task			: 優先度を変更するタスク
  new_priority	: 新しい優先度
 */
 EXTERN void TaskChangePriority(TASK* task, unsigned int new_priority);

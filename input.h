@@ -56,7 +56,8 @@ typedef enum _eBUTTON_ID
 	BUTTON_ID_RIGHT,
 	BUTTON_ID_LEFT_BUTTON,
 	BUTTON_ID_RIGHT_BUTTON,
-	BUTTON_ID_0,
+	BUTTON_NUMER_ID_START,
+	BUTTON_ID_0 = BUTTON_NUMER_ID_START,
 	BUTTON_ID_1,
 	BUTTON_ID_2,
 	BUTTON_ID_3,
@@ -77,11 +78,6 @@ typedef enum _eBUTTON_ID
 	BUTTON_ID_18,
 	BUTTON_ID_19,
 	BUTTON_ID_20,
-	BUTTON_ID_21,
-	BUTTON_ID_22,
-	BUTTON_ID_23,
-	BUTTON_ID_24,
-	BUTTON_ID_25,
 	NUM_BUTTON
 } eBUTTON_ID;
 
@@ -103,7 +99,8 @@ typedef struct _KEYBOARD_INPUT
 */
 typedef struct _JOYSTICK_INPUT
 {
-	unsigned int joystick[64/(sizeof(unsigned int)*8)];
+	unsigned int button;
+	unsigned int stick;
 	unsigned int joystick_map[32];
 } JOYSTICK_INPUT;
 
@@ -220,6 +217,12 @@ EXTERN void LoadDefaultInputSettings(GAME_INPUT* input);
  input	: 入力処理全体を管理するデータ
 */
 EXTERN void UpdateInput(GAME_INPUT* input);
+
+/*
+ InputHardwareUpdate関数
+ 入力ハードウェアの状態を更新する
+*/
+EXTERN void InputHardwareUpdate(void);
 
 #ifdef __cplusplus
 }

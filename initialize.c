@@ -110,6 +110,18 @@ int InitializeGameData(int argc, char** argv)
 			&game_data->display_data.programs),
 			0
 		);
+
+		PriorityArrayAppend(&game_data->display_data.draw_items,
+			DrawSquareItemNew(
+			ImageTextureNew("flame_blue.png",
+				FileOpen, fread, fseek, ftell, FileClose, game_data, &game_data->display_data.textures),
+			500, 260,
+			1,
+			0,
+			RGBA(0x00, 0x00, 0x00, 0x00),
+			&game_data->display_data.programs),
+			0
+		);
 	}
 
 	return TRUE;
