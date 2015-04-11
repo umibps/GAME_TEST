@@ -1,6 +1,11 @@
 ﻿#ifdef _MSC_VER
 // 埋め込み文字列をUTF-8にする
 # pragma execution_character_set("utf-8")
+# if defined(_M_IX86)
+#  pragma comment(lib, "./lib_x86/OpenAL32.lib")
+# else
+#  pragma comment(lib, "./lib_x64/OpenAL32.lib")
+# endif
 #endif
 
 #include <stdio.h>
@@ -57,6 +62,8 @@ int InitializeGameData(int argc, char** argv)
 	glClearColor(0, 0, 0, 0);
 
 	InitializeDisplayData(&game_data->display_data);
+
+	InitializeSoundContext(&game_data->sound_context);
 
 	InitializeTasks(&game_data->tasks, game_data);
 	(void)TaskNew(&game_data->tasks,

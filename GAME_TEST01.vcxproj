@@ -293,6 +293,7 @@
     <ClCompile Include="pc\display.c" />
     <ClCompile Include="pc\input.c" />
     <ClCompile Include="shader_program.c" />
+    <ClCompile Include="sound.c" />
     <ClCompile Include="task.c" />
     <ClCompile Include="task_common.c" />
     <ClCompile Include="text.c" />
@@ -356,6 +357,7 @@
     <ClInclude Include="libpng\pngstruct.h" />
     <ClInclude Include="main_loop.h" />
     <ClInclude Include="shader_program.h" />
+    <ClInclude Include="sound.h" />
     <ClInclude Include="task.h" />
     <ClInclude Include="task_common.h" />
     <ClInclude Include="text.h" />

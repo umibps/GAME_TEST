@@ -222,7 +222,7 @@ void LoadDefaultInputSettings(GAME_INPUT* input)
 */
 void InputHardwareUpdate(void)
 {
-	glutForceJoystickFunc();
+	// glutForceJoystickFunc();
 }
 
 #ifdef __cplusplus

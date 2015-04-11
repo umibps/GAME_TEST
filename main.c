@@ -63,9 +63,17 @@ void TestTask(TASK* task)
 	}
 }
 
+void SoundTestTask(TASK* task)
+{
+	PlaySound((SOUND_PLAY_BASE*)task->data);
+}
+
 int main(int argc, char** argv)
 {
 	GAME_DATA *game_data;
+	TASK *task;
+	FILE *fp;
+
 	if(InitializeGameData(argc, argv) == FALSE)
 	{
 		return 1;
@@ -78,6 +86,25 @@ int main(int argc, char** argv)
 		NULL,
 		0x1000,
 		0
+	);
+
+	fp = fopen("./test.wav", "rb");
+
+	task = TaskNew(&game_data->tasks,
+		SoundTestTask,
+		NULL,
+		0x2000,
+		sizeof(WAVE_SOUND_PLAY)
+	);
+	InitializeWaveSoundPlay(
+		(WAVE_SOUND_PLAY*)task->data,
+		&game_data->sound_context,
+		fp,
+		fread,
+		fseek,
+		ftell,
+		fclose,
+		SOUND_PLAY_FLAG_LOOP_PLAY
 	);
 
 	glutMainLoop();

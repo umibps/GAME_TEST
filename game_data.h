@@ -10,6 +10,7 @@
 #include "input.h"
 #include "task.h"
 #include "utils.h"
+#include "sound.h"
 
 /*
  GAME_DATA構造体
@@ -17,9 +18,10 @@
 */
 struct _GAME_DATA
 {
-	DISPLAY_DATA display_data;	// 描画用のデータ
-	TASKS tasks;				// タスク実行用のデータ
-	GAME_INPUT input;			// 入力処理用のデータ
+	DISPLAY_DATA display_data;		// 描画用のデータ
+	TASKS tasks;					// タスク実行用のデータ
+	GAME_INPUT input;				// 入力処理用のデータ
+	SOUND_CONTEXT sound_context;	// 音声再生用の基本的なデータ
 };
 
 #ifdef __cplusplus
