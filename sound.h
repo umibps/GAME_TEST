@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <AL/al.h>
 #include <AL/alc.h>
+#include <vorbis/vorbisfile.h>
+#include <FLAC/stream_decoder.h>
 #include "types.h"
 
 #define SOUND_BUFFER_SIZE 4096	// 音声バッファの1ブロックのバイト数
@@ -71,6 +73,57 @@ typedef struct _WAVE_SOUND_PLAY
 	// データ削除時の関数ポインタ
 	void (*delete_func)(void*);
 } WAVE_SOUND_PLAY;
+
+/*
+ VORBIS_SOUND_PLAY構造体
+ Vorbisサウンドを再生するためのデータ
+*/
+typedef struct _VORBIS_SOUND_PLAY
+{
+	SOUND_PLAY_BASE base_data;	// 音声再生用の基本的なデータ
+	OggVorbis_File vorbis_file;	// デコードに必要なデータ
+	vorbis_info *vorbis_info;	// 1サンプルあたりのビット数、サンプリングレート等のデータ
+	size_t data_size;			// データのサイズ
+	int current_position;		// 現在の再生位置
+	void *stream;				// 音声データストリーム
+	// データ読み込みの関数ポインタ
+	size_t (*read_func)(void*, size_t, size_t, void*);
+	// データシーク用の関数ポインタ
+	int (*seek_func)(void*, long, int);
+	// データシーク位置取得用の関数ポインタ
+	long (*tell_func)(void*);
+	// データ削除時の関数ポインタ
+	void (*delete_func)(void*);
+} VORBIS_SOUND_PLAY;
+
+// バッファオーバーラン回避用一時保管場所のサイズ
+#define FLAC_CARRY_BUFFER_SIZE (4096 * 4)
+
+/*
+ FLAC_SOUND_PLAY構造体
+ FLACサウンドを再生するためのデータ
+*/
+typedef struct _FLAC_SOUND_PLAY
+{
+	SOUND_PLAY_BASE base_data;		// 音声再生用の基本的なデータ
+	FLAC__StreamDecoder *decoder;	// デコードに必要なデータ
+	size_t data_size;				// 音声データの総バイト数
+	int write_position;				// 音声バッファに書き込んだバイト数
+	int carry_size;					// 一時保管場所に貯めているバイト数
+	int bits_per_sample;			// 1サンプルあたりのビット数
+	int channels;					// ステレオ or モノラル
+	// 一時保管用のバッファ
+	uint8 carry_data[FLAC_CARRY_BUFFER_SIZE];
+	void *stream;				// 音声データストリーム
+	// データ読み込みの関数ポインタ
+	size_t (*read_func)(void*, size_t, size_t, void*);
+	// データシーク用の関数ポインタ
+	int (*seek_func)(void*, long, int);
+	// データシーク位置取得用の関数ポインタ
+	long (*tell_func)(void*);
+	// データ削除時の関数ポインタ
+	void (*delete_func)(void*);
+} FLAC_SOUND_PLAY;
 
 #ifdef __cplusplus
 extern "C" {
@@ -149,6 +202,58 @@ EXTERN void PlaySound(SOUND_PLAY_BASE* sound_play);
 */
 EXTERN int InitializeWaveSoundPlay(
 	WAVE_SOUND_PLAY* sound_play,
+	SOUND_CONTEXT* context,
+	void* stream,
+	size_t (*read_func)(void*, size_t, size_t, void*),
+	int (*seek_func)(void*, long, int),
+	long (*tell_func)(void*),
+	void (*delete_func)(void*),
+	unsigned int play_flags
+);
+
+/*
+ InitializerVorbisSoundPlay関数
+ Vorbisサウンドデータを再生するためのデータを初期化
+ 引数
+ sound_play		: Vorbisサウンドデータを再生するためのデータ
+ context		: 音声再生用のコンテキスト
+ stream			: 音声データストリーム
+ read_func		: データ読み込み用の関数ポインタ
+ seek_func		: データシーク用の関数ポインタ
+ tell_func		: ストリームの位置取得用の関数ポインタ
+ delete_func	: データ削除時に使う関数ポインタ
+ play_flags		: 再生関連のフラグ
+ 返り値
+	正常終了:TRUE	失敗:FALSE
+*/
+EXTERN int InitializeVorbisSoundPlay(
+	VORBIS_SOUND_PLAY* sound_play,
+	SOUND_CONTEXT* context,
+	void* stream,
+	size_t (*read_func)(void*, size_t, size_t, void*),
+	int (*seek_func)(void*, long, int),
+	long (*tell_func)(void*),
+	void (*delete_func)(void*),
+	unsigned int play_flags
+);
+
+/*
+ InitializerFlacSoundPlay関数
+ FLACサウンドデータを再生するためのデータを初期化
+ 引数
+ sound_play		: FLACサウンドデータを再生するためのデータ
+ context		: 音声再生用のコンテキスト
+ stream			: 音声データストリーム
+ read_func		: データ読み込み用の関数ポインタ
+ seek_func		: データシーク用の関数ポインタ
+ tell_func		: ストリームの位置取得用の関数ポインタ
+ delete_func	: データ削除時に使う関数ポインタ
+ play_flags		: 再生関連のフラグ
+ 返り値
+	正常終了:TRUE	失敗:FALSE
+*/
+EXTERN int InitializeFlacSoundPlay(
+	FLAC_SOUND_PLAY* sound_play,
 	SOUND_CONTEXT* context,
 	void* stream,
 	size_t (*read_func)(void*, size_t, size_t, void*),

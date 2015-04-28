@@ -464,6 +464,476 @@ int InitializeWaveSoundPlay(
 	return TRUE;
 }
 
+/*
+ GetVorbisSoundData関数
+ Vorbisサウンドデータから波形データを指定したバイト数取得する
+ 引数
+ buffer		: データを入れるバッファ
+ size		: 取得するバイト数
+ sound_play	: Vorbisサウンドデータを再生するためのデータ
+ 返り値
+	取得したバイト数
+*/
+static size_t GetVorbisSoundData(
+	void* buffer,
+	size_t size,
+	VORBIS_SOUND_PLAY* sound_play
+)
+{
+	const int endian_detect = 0x01;
+	const int endian = ((*(char*)&endian_detect) != 0) ? 0 : 1;
+	return ov_read(&sound_play->vorbis_file, (char*)buffer,
+		size, endian, 2, 1, &sound_play->current_position);
+}
+
+/*
+ TimeSeekVorbisSound関数
+ 指定した秒数の位置に移動する
+ 引数
+ sound_play	: Vorbisサウンドデータを再生するためのデータ
+ time_value	: 移動する秒数
+ 返り値
+	成功:0	失敗:0以外
+*/
+static int TimeSeekVorbisSound(
+	VORBIS_SOUND_PLAY* sound_play,
+	FLOAT_T time_value
+)
+{
+	return ov_time_seek(&sound_play->vorbis_file, time_value);
+}
+
+static void OnDeleteVorbisSound(VORBIS_SOUND_PLAY* sound_play)
+{
+	(void)ov_clear(&sound_play->vorbis_file);
+
+	if(sound_play->delete_func != NULL)
+	{
+		sound_play->delete_func(sound_play->stream);
+	}
+}
+
+static size_t VorbisReadCallback(void* buffer, size_t block_size, size_t num_blocks, VORBIS_SOUND_PLAY* sound_play)
+{
+	return sound_play->read_func(buffer, block_size, num_blocks, sound_play->stream);
+}
+
+static int VorbisSeekCallback(VORBIS_SOUND_PLAY* sound_play, ogg_int64_t offset, int whence)
+{
+	return sound_play->seek_func(sound_play->stream, (long)offset, whence);
+}
+
+static long VorbisTellCallback(VORBIS_SOUND_PLAY* sound_play)
+{
+	return sound_play->tell_func(sound_play->stream);
+}
+
+/*
+ InitializerVorbisSoundPlay関数
+ Vorbisサウンドデータを再生するためのデータを初期化
+ 引数
+ sound_play		: Vorbisサウンドデータを再生するためのデータ
+ context		: 音声再生用のコンテキスト
+ stream			: 音声データストリーム
+ read_func		: データ読み込み用の関数ポインタ
+ seek_func		: データシーク用の関数ポインタ
+ tell_func		: ストリームの位置取得用の関数ポインタ
+ delete_func	: データ削除時に使う関数ポインタ
+ play_flags		: 再生関連のフラグ
+ 返り値
+	正常終了:TRUE	失敗:FALSE
+*/
+int InitializeVorbisSoundPlay(
+	VORBIS_SOUND_PLAY* sound_play,
+	SOUND_CONTEXT* context,
+	void* stream,
+	size_t (*read_func)(void*, size_t, size_t, void*),
+	int (*seek_func)(void*, long, int),
+	long (*tell_func)(void*),
+	void (*delete_func)(void*),
+	unsigned int play_flags
+)
+{
+	ov_callbacks callbacks ={
+		(size_t (*)(void*, size_t, size_t, void*))VorbisReadCallback,
+		(int (*)(void*, ogg_int64_t, int))VorbisSeekCallback,
+		NULL,
+		(long (*)(void*))VorbisTellCallback
+	};
+	ALenum format;
+
+	(void)memset(sound_play, 0, sizeof(*sound_play));
+
+	sound_play->stream = stream;
+
+	sound_play->read_func = read_func;
+	sound_play->seek_func = seek_func;
+	sound_play->tell_func = tell_func;
+	sound_play->delete_func = delete_func;
+
+	if(ov_open_callbacks(sound_play, &sound_play->vorbis_file, NULL, 0, callbacks))
+	{
+		return FALSE;
+	}
+
+	// 音声のサンプリングレートやモノラルorステレオの情報を取得
+	sound_play->vorbis_info = ov_info(&sound_play->vorbis_file, -1);
+	format = (sound_play->vorbis_info->channels == 1)
+		? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
+
+	InitializeSoundPlayBase(
+		&sound_play->base_data,
+		context,
+		(size_t (*)(uint8*, size_t, SOUND_PLAY_BASE*))GetVorbisSoundData,
+		(int(*)(SOUND_PLAY_BASE*, FLOAT_T))TimeSeekVorbisSound,
+		(void (*)(SOUND_PLAY_BASE*))OnDeleteVorbisSound,
+		format,
+		sound_play->vorbis_info->rate,
+		play_flags
+	);
+
+	return TRUE;
+}
+
+/*
+ GetFlacSoundData関数
+ FLACサウンドデータから波形データを指定したバイト数取得する
+ 引数
+ buffer		: データを入れるバッファ
+ size		: 取得するバイト数
+ sound_play	: FLACサウンドデータを再生するためのデータ
+ 返り値
+	取得したバイト数
+*/
+static size_t GetFlacSoundData(
+	void* buffer,
+	size_t size,
+	FLAC_SOUND_PLAY* sound_play
+)
+{
+	// 前回の残りデータが要求サイズより少ないなら
+	if(sound_play->carry_size < (int)size)
+	{	// 残りのデータをバッファにコピー
+		(void)memcpy(buffer, sound_play->carry_data, sound_play->carry_size);
+		// データを新たにデコードする
+		sound_play->write_position = sound_play->carry_size;
+		sound_play->carry_size = 0;
+		while(sound_play->write_position < (int)size
+			&& sound_play->tell_func(sound_play->stream) != sound_play->data_size)
+		{	// データの終端までデコード
+			FLAC__stream_decoder_process_single(sound_play->decoder);
+		}
+	}
+	else
+	{	// 前回の残りデータが要求サイズより大きいので
+			// 残りデータをコピーして
+		(void)memcpy(buffer, sound_play->carry_data, size);
+		// コピーし終わったデータは破棄
+		(void)memmove(sound_play->carry_data, &sound_play->carry_data[size],
+			sound_play->carry_size - size);
+		sound_play->carry_size -= size;
+		sound_play->write_position = size;
+	}
+
+	return sound_play->write_position;
+}
+
+/*
+ TimeSeekFlacSound関数
+ 指定した秒数の位置に移動する
+ 引数
+ sound_play	: FLACサウンドデータを再生するためのデータ
+ time_value	: 移動する秒数
+ 返り値
+	成功:0	失敗:0以外
+*/
+static int TimeSeekFlacSound(
+	FLAC_SOUND_PLAY* sound_play,
+	FLOAT_T time_value
+)
+{
+	int sample = (int)(sound_play->base_data.sample_rate * time_value);
+	return !(FLAC__stream_decoder_seek_absolute(sound_play->decoder, sample));
+}
+
+static void OnDeleteFlacSound(FLAC_SOUND_PLAY* sound_play)
+{
+	FLAC__stream_decoder_delete(sound_play->decoder);
+
+	if(sound_play->delete_func != NULL)
+	{
+		sound_play->delete_func(sound_play->stream);
+	}
+}
+
+static FLAC__StreamDecoderReadStatus FlacReadCallback(
+	const FLAC__StreamDecoder* decoder,
+	FLAC__byte* buffer,
+	size_t* bytes,
+	FLAC_SOUND_PLAY* sound_play
+)
+{
+	if(*bytes > 0)
+	{
+		*bytes = sound_play->read_func(buffer, 1, *bytes, sound_play->stream);
+		if(*bytes == 0)
+		{
+			return FLAC__STREAM_DECODER_READ_STATUS_END_OF_STREAM;
+		}
+		return FLAC__STREAM_DECODER_READ_STATUS_CONTINUE;
+	}
+
+	return FLAC__STREAM_DECODER_READ_STATUS_ABORT;
+}
+
+static FLAC__StreamDecoderSeekStatus FlacSeekCallback(
+	const FLAC__StreamDecoder* decoder,
+	FLAC__uint64 offset,
+	FLAC_SOUND_PLAY* sound_play
+)
+{
+	if(sound_play->seek_func(sound_play->stream, (long)offset, SEEK_SET) < 0)
+	{
+		return FLAC__STREAM_DECODER_SEEK_STATUS_ERROR;
+	}
+	return FLAC__STREAM_DECODER_SEEK_STATUS_OK;
+}
+
+static FLAC__StreamDecoderTellStatus FlacTellCallback(
+	const FLAC__StreamDecoder* decoder,
+	FLAC__uint64* offset,
+	FLAC_SOUND_PLAY* sound_play
+)
+{
+	*offset = sound_play->tell_func(sound_play->stream);
+	return FLAC__STREAM_DECODER_TELL_STATUS_OK;
+}
+
+static FLAC__StreamDecoderLengthStatus FlacLengthCallback(
+	const FLAC__StreamDecoder* decoder,
+	FLAC__uint64* length,
+	FLAC_SOUND_PLAY* sound_play
+	)
+{
+	*length = sound_play->data_size;
+	return FLAC__STREAM_DECODER_LENGTH_STATUS_OK;
+}
+
+static FLAC__bool FlacEndOfFileCallback(const FLAC__StreamDecoder* decoder, FLAC_SOUND_PLAY* sound_play)
+{
+	return sound_play->tell_func(sound_play->stream) == sound_play->data_size;
+}
+
+static void FlacMetadataCallback(
+	const FLAC__StreamDecoder* decoder,
+	const FLAC__StreamMetadata* metadata,
+	FLAC_SOUND_PLAY* sound_play
+)
+{
+	if(metadata->type == FLAC__METADATA_TYPE_STREAMINFO)
+	{
+		ALenum format;
+
+		sound_play->bits_per_sample = metadata->data.stream_info.bits_per_sample;
+		sound_play->channels = metadata->data.stream_info.channels;
+
+		// OpenAL周りの初期化
+		format = (metadata->data.stream_info.channels == 1)
+			? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
+
+		InitializeSoundPlayBase(
+			&sound_play->base_data,
+			sound_play->base_data.context,
+			(size_t (*)(uint8*, size_t, SOUND_PLAY_BASE*))GetFlacSoundData,
+			(int(*)(SOUND_PLAY_BASE*, FLOAT_T))TimeSeekFlacSound,
+			(void (*)(SOUND_PLAY_BASE*))OnDeleteVorbisSound,
+			format,
+			metadata->data.stream_info.sample_rate,
+			sound_play->base_data.play_flags
+		);
+	}
+}
+
+static FLAC__StreamDecoderWriteStatus FlacWriteCallback(
+	const FLAC__StreamDecoder* decoder,
+	const FLAC__Frame* frame,
+	const FLAC__int32* const buffer[],
+	FLAC_SOUND_PLAY* sound_play
+)
+{
+	unsigned int num_blocks;
+	unsigned int block_size = sound_play->bits_per_sample / 8 * sound_play->channels;
+	unsigned int carry_size = 0;
+	unsigned int i;
+
+	num_blocks = frame->header.blocksize;
+	// バッファオーバーランチェック
+	if(num_blocks * block_size + sound_play->write_position > SOUND_BUFFER_SIZE)
+	{	// このままではバッファオーバーランするので一時保管場所に入れるサイズを決める
+		carry_size = num_blocks * block_size + sound_play->write_position - SOUND_BUFFER_SIZE;
+		carry_size /= block_size;
+		sound_play->carry_size = carry_size * block_size;
+		num_blocks = frame->header.blocksize - carry_size;
+	}
+	else
+	{	// バッファオーバーラン無し
+		num_blocks = frame->header.blocksize;
+	}
+
+	// ステレオorモノラル & 音声のサンプルサイズに合わせて処理を切り替え
+	switch(sound_play->channels)
+	{
+	case 1:
+		switch(sound_play->bits_per_sample)
+		{
+		case 8:
+			for(i=0; i<num_blocks; i++)
+			{
+				sound_play->base_data.buffer[i+sound_play->write_position] = (uint8)buffer[0][i];
+			}
+			for(i=0; i<carry_size; i++)
+			{
+				sound_play->carry_data[i] = (uint8)buffer[0][num_blocks+i];
+			}
+			break;
+		case 16:
+			{
+				uint16 *dst;
+				dst = (uint16*)&sound_play->base_data.sound_data[sound_play->write_position];
+				for(i=0; i<num_blocks; i++)
+				{
+					dst[i] = (uint16)buffer[0][i];
+				}
+				dst = (uint16*)sound_play->carry_data;
+				for(i=0; i<carry_size; i++)
+				{
+					((uint16*)sound_play->carry_data)[i] = (uint16)buffer[0][num_blocks+i];
+				}
+			}
+			break;
+		}
+		break;
+	case 2:
+		switch(sound_play->bits_per_sample)
+		{
+		case 8:
+			for(i=0; i<num_blocks; i++)
+			{
+				sound_play->base_data.buffer[i*2+0+sound_play->write_position] = (uint8)buffer[0][i];
+				sound_play->base_data.buffer[i*2+1+sound_play->write_position] = (uint8)buffer[1][i];
+			}
+			for(i=0; i<carry_size; i++)
+			{
+				sound_play->carry_data[i*2+0] = (uint8)buffer[0][num_blocks+i];
+				sound_play->carry_data[i*2+1] = (uint8)buffer[1][num_blocks+i];
+			}
+			break;
+		case 16:
+			{
+				uint16 *dst;
+				dst = (uint16*)&sound_play->base_data.sound_data[sound_play->write_position];
+				for(i=0; i<num_blocks; i++)
+				{
+					dst[i*2+0] = (uint16)buffer[0][i];
+					dst[i*2+1] = (uint16)buffer[1][i];
+				}
+				dst = (uint16*)sound_play->carry_data;
+				for(i=0; i<carry_size; i++)
+				{
+					dst[i*2+0] = (uint16)buffer[0][num_blocks+i];
+					dst[i*2+1] = (uint16)buffer[1][num_blocks+i];
+				}
+			}
+			break;
+		}
+		break;
+	}
+
+	sound_play->write_position += num_blocks * block_size;
+
+	return FLAC__STREAM_DECODER_WRITE_STATUS_CONTINUE;
+}
+
+static void FlacErrorCallback(
+	const FLAC__StreamDecoder* decoder,
+	FLAC__StreamDecoderErrorStatus status,
+	FLAC_SOUND_PLAY* sound_play
+)
+{
+}
+
+/*
+ InitializerFlacSoundPlay関数
+ FLACサウンドデータを再生するためのデータを初期化
+ 引数
+ sound_play		: FLACサウンドデータを再生するためのデータ
+ context		: 音声再生用のコンテキスト
+ stream			: 音声データストリーム
+ read_func		: データ読み込み用の関数ポインタ
+ seek_func		: データシーク用の関数ポインタ
+ tell_func		: ストリームの位置取得用の関数ポインタ
+ delete_func	: データ削除時に使う関数ポインタ
+ play_flags		: 再生関連のフラグ
+ 返り値
+	正常終了:TRUE	失敗:FALSE
+*/
+int InitializeFlacSoundPlay(
+	FLAC_SOUND_PLAY* sound_play,
+	SOUND_CONTEXT* context,
+	void* stream,
+	size_t (*read_func)(void*, size_t, size_t, void*),
+	int (*seek_func)(void*, long, int),
+	long (*tell_func)(void*),
+	void (*delete_func)(void*),
+	unsigned int play_flags
+)
+{
+
+	(void)memset(sound_play, 0, sizeof(*sound_play));
+
+	sound_play->stream = stream;
+
+	sound_play->read_func = read_func;
+	sound_play->seek_func = seek_func;
+	sound_play->tell_func = tell_func;
+	sound_play->delete_func = delete_func;
+
+	(void)seek_func(stream, 0, SEEK_END);
+	sound_play->data_size = tell_func(stream);
+	(void)seek_func(stream, 0, SEEK_SET);
+
+	sound_play->base_data.context = context;
+	sound_play->base_data.play_flags = play_flags;
+
+	sound_play->decoder = FLAC__stream_decoder_new();
+
+	if(FLAC__stream_decoder_init_stream(
+		sound_play->decoder,
+		(FLAC__StreamDecoderReadCallback)FlacReadCallback,
+		(FLAC__StreamDecoderSeekCallback)FlacSeekCallback,
+		(FLAC__StreamDecoderTellCallback)FlacTellCallback,
+		(FLAC__StreamDecoderLengthCallback)FlacLengthCallback,
+		(FLAC__StreamDecoderEofCallback)FlacEndOfFileCallback,
+		(FLAC__StreamDecoderWriteCallback)FlacWriteCallback,
+		(FLAC__StreamDecoderMetadataCallback)FlacMetadataCallback,
+		(FLAC__StreamDecoderErrorCallback)FlacErrorCallback,
+		sound_play)
+			!= FLAC__STREAM_DECODER_INIT_STATUS_OK
+	)
+	{
+		FLAC__stream_decoder_delete(sound_play->decoder);
+		return FALSE;
+	}
+
+	if(FLAC__stream_decoder_process_until_end_of_metadata(sound_play->decoder) == FALSE)
+	{
+		FLAC__stream_decoder_delete(sound_play->decoder);
+		return FALSE;
+	}
+	
+	return TRUE;
+}
+
 #ifdef __cplusplus
 }
 #endif
