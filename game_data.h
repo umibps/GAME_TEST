@@ -22,6 +22,7 @@ struct _GAME_DATA
 	TASKS tasks;					// タスク実行用のデータ
 	GAME_INPUT input;				// 入力処理用のデータ
 	SOUND_CONTEXT sound_context;	// 音声再生用の基本的なデータ
+	SOUNDS sounds;					// BGM, 効果音全体のデータ
 };
 
 #ifdef __cplusplus

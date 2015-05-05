@@ -85,7 +85,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>FT2_BUILD_LIBRARY;WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>"./include"; "./include/zlib"; "./include/png"; "./include/freetype";</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>"./include"; "./include/zlib"; "./include/png"; "./include/freetype"; "./include/libFLAC";</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -115,7 +115,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>FT2_BUILD_LIBRARY;WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>"./include"; "./include/zlib"; "./include/png"; "./include/freetype";</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>"./include"; "./include/zlib"; "./include/png"; "./include/freetype"; "./include/libFLAC";</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -226,6 +226,37 @@
     <ClCompile Include="image_file.c" />
     <ClCompile Include="initialize.c" />
     <ClCompile Include="input_common.c" />
+    <ClCompile Include="libFLAC\bitmath.c" />
+    <ClCompile Include="libFLAC\bitreader.c" />
+    <ClCompile Include="libFLAC\bitwriter.c" />
+    <ClCompile Include="libFLAC\cpu.c" />
+    <ClCompile Include="libFLAC\crc.c" />
+    <ClCompile Include="libFLAC\fixed.c" />
+    <ClCompile Include="libFLAC\fixed_intrin_sse2.c" />
+    <ClCompile Include="libFLAC\fixed_intrin_ssse3.c" />
+    <ClCompile Include="libFLAC\float.c" />
+    <ClCompile Include="libFLAC\format.c" />
+    <ClCompile Include="libFLAC\lpc.c" />
+    <ClCompile Include="libFLAC\lpc_intrin_avx2.c" />
+    <ClCompile Include="libFLAC\lpc_intrin_sse.c" />
+    <ClCompile Include="libFLAC\lpc_intrin_sse2.c" />
+    <ClCompile Include="libFLAC\lpc_intrin_sse41.c" />
+    <ClCompile Include="libFLAC\md5.c" />
+    <ClCompile Include="libFLAC\memory.c" />
+    <ClCompile Include="libFLAC\metadata_iterators.c" />
+    <ClCompile Include="libFLAC\metadata_object.c" />
+    <ClCompile Include="libFLAC\ogg_decoder_aspect.c" />
+    <ClCompile Include="libFLAC\ogg_encoder_aspect.c" />
+    <ClCompile Include="libFLAC\ogg_helper.c" />
+    <ClCompile Include="libFLAC\ogg_mapping.c" />
+    <ClCompile Include="libFLAC\share\win_utf8_io\win_utf8_io.c" />
+    <ClCompile Include="libFLAC\stream_decoder.c" />
+    <ClCompile Include="libFLAC\stream_encoder.c" />
+    <ClCompile Include="libFLAC\stream_encoder_framing.c" />
+    <ClCompile Include="libFLAC\stream_encoder_intrin_avx2.c" />
+    <ClCompile Include="libFLAC\stream_encoder_intrin_sse2.c" />
+    <ClCompile Include="libFLAC\stream_encoder_intrin_ssse3.c" />
+    <ClCompile Include="libFLAC\window.c" />
     <ClCompile Include="libjpeg\cdjpeg.c" />
     <ClCompile Include="libjpeg\jaricom.c" />
     <ClCompile Include="libjpeg\jcapimin.c" />
@@ -288,8 +319,38 @@
     <ClCompile Include="libpng\pngwrite.c" />
     <ClCompile Include="libpng\pngwtran.c" />
     <ClCompile Include="libpng\pngwutil.c" />
+    <ClCompile Include="libvorbis\analysis.c" />
+    <ClCompile Include="libvorbis\bitrate.c" />
+    <ClCompile Include="libvorbis\block.c" />
+    <ClCompile Include="libvorbis\codebook.c" />
+    <ClCompile Include="libvorbis\envelope.c" />
+    <ClCompile Include="libvorbis\floor0.c" />
+    <ClCompile Include="libvorbis\floor1.c" />
+    <ClCompile Include="libvorbis\info.c" />
+    <ClCompile Include="libvorbis\lookup.c" />
+    <ClCompile Include="libvorbis\lpc.c">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)\libvorbis_lpc.obj</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)\libvorbis_lpc.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="libvorbis\lsp.c" />
+    <ClCompile Include="libvorbis\mapping0.c" />
+    <ClCompile Include="libvorbis\mdct.c" />
+    <ClCompile Include="libvorbis\psy.c" />
+    <ClCompile Include="libvorbis\registry.c" />
+    <ClCompile Include="libvorbis\res0.c" />
+    <ClCompile Include="libvorbis\sharedbook.c" />
+    <ClCompile Include="libvorbis\smallft.c" />
+    <ClCompile Include="libvorbis\synthesis.c" />
+    <ClCompile Include="libvorbis\vorbisenc.c" />
+    <ClCompile Include="libvorbis\vorbisfile.c" />
+    <ClCompile Include="libvorbis\window.c">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)\libvorbis_window.obj</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)\libvorbis_window.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="main.c" />
     <ClCompile Include="main_loop.c" />
+    <ClCompile Include="ogg\bitwise.c" />
+    <ClCompile Include="ogg\framing.c" />
     <ClCompile Include="pc\display.c" />
     <ClCompile Include="pc\input.c" />
     <ClCompile Include="shader_program.c" />
@@ -337,6 +398,17 @@
     <ClInclude Include="include\GL\glew.h" />
     <ClInclude Include="include\GL\glxew.h" />
     <ClInclude Include="include\GL\wglew.h" />
+    <ClInclude Include="include\libFLAC\FLAC\all.h" />
+    <ClInclude Include="include\libFLAC\FLAC\assert.h" />
+    <ClInclude Include="include\libFLAC\FLAC\callback.h" />
+    <ClInclude Include="include\libFLAC\FLAC\export.h" />
+    <ClInclude Include="include\libFLAC\FLAC\format.h" />
+    <ClInclude Include="include\libFLAC\FLAC\metadata.h" />
+    <ClInclude Include="include\libFLAC\FLAC\ordinals.h" />
+    <ClInclude Include="include\libFLAC\FLAC\stream_decoder.h" />
+    <ClInclude Include="include\libFLAC\FLAC\stream_encoder.h" />
+    <ClInclude Include="include\ogg\ogg.h" />
+    <ClInclude Include="include\ogg\os_types.h" />
     <ClInclude Include="initialize.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="libjpeg\jconfig.h" />
@@ -355,6 +427,25 @@
     <ClInclude Include="libpng\pnglibconf.h" />
     <ClInclude Include="libpng\pngpriv.h" />
     <ClInclude Include="libpng\pngstruct.h" />
+    <ClInclude Include="libvorbis\backends.h" />
+    <ClInclude Include="libvorbis\bitrate.h" />
+    <ClInclude Include="libvorbis\codebook.h" />
+    <ClInclude Include="libvorbis\codec_internal.h" />
+    <ClInclude Include="libvorbis\envelope.h" />
+    <ClInclude Include="libvorbis\highlevel.h" />
+    <ClInclude Include="libvorbis\lookup.h" />
+    <ClInclude Include="libvorbis\lookup_data.h" />
+    <ClInclude Include="libvorbis\lpc.h" />
+    <ClInclude Include="libvorbis\lsp.h" />
+    <ClInclude Include="libvorbis\masking.h" />
+    <ClInclude Include="libvorbis\mdct.h" />
+    <ClInclude Include="libvorbis\misc.h" />
+    <ClInclude Include="libvorbis\os.h" />
+    <ClInclude Include="libvorbis\psy.h" />
+    <ClInclude Include="libvorbis\registry.h" />
+    <ClInclude Include="libvorbis\scales.h" />
+    <ClInclude Include="libvorbis\smallft.h" />
+    <ClInclude Include="libvorbis\window.h" />
     <ClInclude Include="main_loop.h" />
     <ClInclude Include="shader_program.h" />
     <ClInclude Include="sound.h" />

@@ -115,10 +115,9 @@ void ReleaseSoundPlay(SOUND_PLAY_BASE* sound_play)
 {
 	int i;
 
-	if(sound_play->delete_func != NULL)
-	{
-		sound_play->delete_func(sound_play);
-	}
+	// 再生を停止する
+	alcMakeContextCurrent(sound_play->context->context);
+	alSourceStop(sound_play->source);
 
 	// OpenALのバッファを破棄する
 	for(i=0; i<SOUND_BUFFER_NUM; i++)
@@ -140,6 +139,11 @@ void ReleaseSoundPlay(SOUND_PLAY_BASE* sound_play)
 
 	// コンテキストをリセット
 	alcMakeContextCurrent(NULL);
+	
+	if(sound_play->delete_func != NULL)
+	{
+		sound_play->delete_func(sound_play);
+	}
 }
 
 /*
@@ -153,6 +157,11 @@ void PlaySound(SOUND_PLAY_BASE* sound_play)
 	ALint finished;				// 再生が終了したか判定用
 	int second_loop = FALSE;	// ループ再生での嵌り回避用
 
+	if((sound_play->play_flags & SOUND_PLAY_FLAG_PAUSE) != 0)
+	{	// 一時停止中なら終了
+		return;
+	}
+
 	// コンテキストをセット
 	alcMakeContextCurrent(sound_play->context->context);
 
@@ -160,7 +169,8 @@ void PlaySound(SOUND_PLAY_BASE* sound_play)
 	alGetSourcei(sound_play->source, AL_SOURCE_STATE, &sound_play->play_state);
 
 	// 再生状態でなければ再生開始
-	if(sound_play->play_state != AL_PLAYING && sound_play->play_state != AL_STOPPED)
+	if(sound_play->play_state != AL_PLAYING &&
+		(sound_play->play_state != AL_STOPPED || (sound_play->play_flags & SOUND_PLAY_FLAG_LOOP_PLAY) != 0))
 	{
 		alSourcePlay(sound_play->source);
 	}
@@ -193,7 +203,7 @@ void PlaySound(SOUND_PLAY_BASE* sound_play)
 					second_loop = TRUE;
 
 					// 読み込みやり直し
-					continue;
+					size = sound_play->get_data_func(sound_play->sound_data, SOUND_BUFFER_SIZE, sound_play);
 				}
 				else
 				{
@@ -216,6 +226,28 @@ void PlaySound(SOUND_PLAY_BASE* sound_play)
 			second_loop = FALSE;
 		}
 	}
+}
+
+/*
+ PauseSound関数
+ 音声再生を一時停止する
+ 引数
+ sound_play	: 音声再生用の基本的なデータ
+*/
+void PauseSound(SOUND_PLAY_BASE* sound)
+{
+	alSourcePause(sound->source);
+	sound->play_flags |= SOUND_PLAY_FLAG_PAUSE;
+}
+
+/*
+ StartPlaySound関数
+ 音声再生を開始する
+ sound_play	: 音声再生用の基本的なデータ
+*/
+void StartPlaySound(SOUND_PLAY_BASE* sound)
+{
+	sound->play_flags &= ~(SOUND_PLAY_FLAG_PAUSE);
 }
 
 /*
@@ -932,6 +964,256 @@ int InitializeFlacSoundPlay(
 	}
 	
 	return TRUE;
+}
+
+/*
+ InitiaizeSounds関数
+ BGM, 効果音全体を管理する構造体を初期化
+ 引数
+ sounds		: BGM, 効果音全体を管理する構造体
+ context	: 音声再生用の基本データ
+*/
+void InitializeSounds(SOUNDS* sounds, SOUND_CONTEXT* context)
+{
+	(void)memset(sounds, 0, sizeof(*sounds));
+
+	sounds->sounds = (SOUND_ITEM**)MEM_ALLOC_FUNC(
+		sizeof(*sounds->sounds) * SOUNDS_DEFAULT_BUFFER_SIZE);
+	(void)memset(sounds->sounds, 0, sizeof(*sounds->sounds) * SOUNDS_DEFAULT_BUFFER_SIZE);
+	sounds->buffer_size = SOUNDS_DEFAULT_BUFFER_SIZE;
+	sounds->context = context;
+}
+
+static size_t ReadSoundData(void* buffer, size_t block_size, size_t num_blocks, SOUND_ITEM* sound_item)
+{
+	return sound_item->read_func(buffer, block_size, num_blocks, sound_item->stream);
+}
+
+static int SeekSoundData(SOUND_ITEM* sound_item, long offset, int whence)
+{
+	return sound_item->seek_func(sound_item->stream, offset, whence);
+}
+
+static int TellSoundData(SOUND_ITEM* sound_item)
+{
+	return sound_item->tell_func(sound_item->stream);
+}
+
+static void OnDeleteSoundData(SOUND_ITEM* sound_item)
+{
+	size_t i;
+	for(i=0; i<sound_item->sounds->buffer_size; i++)
+	{
+		if(sound_item->sounds->sounds[i] == sound_item)
+		{
+			sound_item->sounds->sounds[i] = NULL;
+			if(sound_item->sounds->search_start > i)
+			{
+				sound_item->sounds->search_start = i;
+			}
+		}
+	}
+
+	if(sound_item->delete_func != NULL)
+	{
+		sound_item->delete_func(sound_item->stream);
+	}
+	
+	if(sound_item->sounds->num_sounds > 0)
+	{
+		sound_item->sounds->num_sounds--;
+	}
+
+	MEM_FREE_FUNC(sound_item->sound_play);
+	MEM_FREE_FUNC(sound_item);
+}
+
+/*
+ AddSound関数
+ BGM, または効果音を追加する
+ 引数
+ sounds	: BGM, 効果音全体を管理する構造体
+ open_func		: データを開くための関数ポインタ
+ read_func		: データ読み込み用の関数ポインタ
+ seek_func		: シーク位置を変更するための関数ポインタ
+ tell_func		: シーク位置を取得するための関数ポインタ
+ delete_func	: データを閉じるための関数ポインタ
+ play_flags		: 音声再生のフラグ
+ user_data		: データを開く際に使うユーザー定義データ
+ 返り値
+	音声再生を管理するデータ
+*/
+SOUND_PLAY_BASE* AddSound(
+	SOUNDS* sounds,
+	const char* path,
+	void* (*open_func)(const char*, const char*, void*),
+	size_t (*read_func)(void*, size_t, size_t, void*),
+	int (*seek_func)(void*, long, int),
+	long (*tell_func)(void*),
+	void (*delete_func)(void*),
+	unsigned int play_flags,
+	void* user_data
+)
+{
+	SOUND_PLAY_BASE *ret = NULL;
+	size_t search_start = sounds->search_start;
+	void *stream;
+	const char *extention = path;
+	SOUND_ITEM **target = NULL;
+
+	if((stream = open_func(path, "rb", user_data)) == NULL)
+	{	// ファイルオープン失敗
+		return NULL;
+	}
+
+	// 拡張子を取得
+	{
+		const char *p = extention;
+		while(*p != '\0')
+		{
+			if(*p == '.')
+			{
+				extention = p;
+			}
+			p = GetNextUtf8Character(p);
+		}
+	}
+
+	for( ; search_start<sounds->buffer_size; search_start++)
+	{
+		if(sounds->sounds[search_start] == NULL)
+		{
+			target = &sounds->sounds[search_start];
+			break;
+		}
+	}
+	if(target == NULL)
+	{
+		delete_func(stream);
+		return NULL;
+	}
+
+	*target = (SOUND_ITEM*)MEM_ALLOC_FUNC(sizeof(**target));
+	(*target)->stream = stream;
+	(*target)->read_func = read_func;
+	(*target)->seek_func = seek_func;
+	(*target)->tell_func = tell_func;
+	(*target)->delete_func = delete_func;
+
+	if(target == NULL)
+	{
+		return NULL;
+	}
+
+	if(StringCompareIgnoreCase(extention, ".ogg") == 0
+		|| StringCompareIgnoreCase(extention, ".oga") == 0)
+	{
+		ret = (SOUND_PLAY_BASE*)MEM_ALLOC_FUNC(sizeof(VORBIS_SOUND_PLAY));
+		if(InitializeVorbisSoundPlay(
+			(VORBIS_SOUND_PLAY*)ret,
+			sounds->context,
+			*target,
+			(size_t(*)(void*, size_t, size_t, void*))ReadSoundData,
+			(int(*)(void*, long, int))SeekSoundData,
+			(long(*)(void*))TellSoundData,
+			(void(*)(void*))OnDeleteSoundData,
+			play_flags
+			) == FALSE
+		)
+		{
+			delete_func(stream);
+			return NULL;
+		}
+	}
+	else if(StringCompareIgnoreCase(extention, ".flac") == 0)
+	{
+		ret = (SOUND_PLAY_BASE*)MEM_ALLOC_FUNC(sizeof(FLAC_SOUND_PLAY));
+		if(InitializeFlacSoundPlay(
+			(FLAC_SOUND_PLAY*)ret,
+			sounds->context,
+			*target,
+			(size_t(*)(void*, size_t, size_t, void*))ReadSoundData,
+			(int(*)(void*, long, int))SeekSoundData,
+			(long(*)(void*))TellSoundData,
+			(void(*)(void*))OnDeleteSoundData,
+			play_flags
+			) == FALSE
+		)
+		{
+			delete_func(stream);
+			return NULL;
+		}
+	}
+	else if(StringCompareIgnoreCase(extention, ".wav") == 0)
+	{
+		ret = (SOUND_PLAY_BASE*)MEM_ALLOC_FUNC(sizeof(WAVE_SOUND_PLAY));
+		if(InitializeWaveSoundPlay(
+			(WAVE_SOUND_PLAY*)ret,
+			sounds->context,
+			*target,
+			(size_t(*)(void*, size_t, size_t, void*))ReadSoundData,
+			(int(*)(void*, long, int))SeekSoundData,
+			(long(*)(void*))TellSoundData,
+			(void(*)(void*))OnDeleteSoundData,
+			play_flags
+			) == FALSE
+		)
+		{
+			delete_func(stream);
+			return NULL;
+		}
+	}
+	else
+	{
+		delete_func(stream);
+		return NULL;
+	}
+	(*target)->sound_play = ret;
+	(*target)->sounds = sounds;
+
+	sounds->search_start = search_start;
+	sounds->num_sounds++;
+
+	if(sounds->num_sounds >= sounds->buffer_size)
+	{
+		size_t before_size = sounds->buffer_size;
+		sounds->buffer_size += SOUNDS_DEFAULT_BUFFER_SIZE;
+		sounds->sounds = (SOUND_ITEM**)MEM_REALLOC_FUNC(
+			sounds->sounds, sizeof(*sounds->sounds) * sounds->buffer_size);
+		(void)memset(&sounds[before_size], 0, sizeof(*sounds->sounds) * SOUNDS_DEFAULT_BUFFER_SIZE);
+		sounds->search_start = 0;
+	}
+
+	return ret;
+}
+
+/*
+ PlayAllSound関数
+ 全てのBGM, 効果音を再生する
+ 引数
+ sounds	: BGM, 効果音全体を管理する構造体
+*/
+void PlayAllSound(SOUNDS* sounds)
+{
+	size_t num_play;
+	size_t i;
+
+	for(num_play=0, i=0; i<sounds->buffer_size && num_play<sounds->num_sounds; i++)
+	{
+		if(sounds->sounds[i] != NULL)
+		{
+			PlaySound(sounds->sounds[i]->sound_play);
+			if((sounds->sounds[i]->sound_play->play_flags & SOUND_PLAY_FLAG_END) != 0
+				&& (sounds->sounds[i]->sound_play->play_flags & SOUND_PLAY_FLAG_LOOP_PLAY) == 0)
+			{
+				ReleaseSoundPlay(sounds->sounds[i]->sound_play);
+			}
+			else
+			{
+				num_play++;
+			}
+		}
+	}
 }
 
 #ifdef __cplusplus

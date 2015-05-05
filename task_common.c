@@ -30,6 +30,8 @@ void TaskTop(TASK* task)
 void TaskBottom(TASK* task)
 {
 	glutSwapBuffers();
+
+	PlayAllSound(&task->tasks->game_data->sounds);
 }
 
 #ifdef __cplusplus

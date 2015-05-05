@@ -65,6 +65,8 @@ int InitializeGameData(int argc, char** argv)
 
 	InitializeSoundContext(&game_data->sound_context);
 
+	InitializeSounds(&game_data->sounds, &game_data->sound_context);
+
 	InitializeTasks(&game_data->tasks, game_data);
 	(void)TaskNew(&game_data->tasks,
 		(void (*)(TASK*))TaskTop,
@@ -72,6 +74,7 @@ int InitializeGameData(int argc, char** argv)
 		0x00000000,
 		0
 	);
+
 	(void)TaskNew(&game_data->tasks,
 		(void (*)(TASK*))TaskBottom,
 		NULL,

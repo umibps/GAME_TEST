@@ -60,6 +60,19 @@ void TestTask(TASK* task)
 				item2->color = 0x00000000;
 			}
 		}
+		if(game_data->input.input_down & BUTTON_FLAG_1)
+		{
+			AddSound(&game_data->sounds,
+				"test.ogg",
+				fopen,
+				fread,
+				fseek,
+				ftell,
+				fclose,
+				SOUND_PLAY_NO_FLAG,
+				NULL
+	);
+		}
 	}
 }
 
@@ -71,8 +84,6 @@ void SoundTestTask(TASK* task)
 int main(int argc, char** argv)
 {
 	GAME_DATA *game_data;
-	TASK *task;
-	FILE *fp;
 
 	if(InitializeGameData(argc, argv) == FALSE)
 	{
@@ -87,24 +98,15 @@ int main(int argc, char** argv)
 		0x1000,
 		0
 	);
-
-	fp = fopen("./test.wav", "rb");
-
-	task = TaskNew(&game_data->tasks,
-		SoundTestTask,
-		NULL,
-		0x2000,
-		sizeof(WAVE_SOUND_PLAY)
-	);
-	InitializeWaveSoundPlay(
-		(WAVE_SOUND_PLAY*)task->data,
-		&game_data->sound_context,
-		fp,
+	AddSound(&game_data->sounds,
+		"test_bgm.flac",
+		fopen,
 		fread,
 		fseek,
 		ftell,
 		fclose,
-		SOUND_PLAY_FLAG_LOOP_PLAY
+		SOUND_PLAY_FLAG_LOOP_PLAY,
+		NULL
 	);
 
 	glutMainLoop();

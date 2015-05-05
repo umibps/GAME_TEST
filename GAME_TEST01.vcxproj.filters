@@ -61,6 +61,30 @@
     <Filter Include="ソース ファイル\freetype\FT_MODULES">
       <UniqueIdentifier>{b83ea0b4-7767-410b-9c18-f4df38546a11}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\libvorbis">
+      <UniqueIdentifier>{affcd902-528f-4486-a025-dadac35d655e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\libogg">
+      <UniqueIdentifier>{88a3c4a5-6253-4c93-b0a7-ddc274867efc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\libogg">
+      <UniqueIdentifier>{9ba6dea6-3754-4765-a1e1-472767e576e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\libvorbis">
+      <UniqueIdentifier>{d5ba7973-13cd-44e8-8ee1-7fd8c9dc5884}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\vorbisfile">
+      <UniqueIdentifier>{c3c7bcaf-03f4-4073-85de-46132af76009}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\libFLAC">
+      <UniqueIdentifier>{560ae19a-6b1a-4832-93f6-a7bbcc7ec862}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\libFLAC">
+      <UniqueIdentifier>{c939895d-77fb-4fa3-b713-055afca5e854}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\libFLAC\share">
+      <UniqueIdentifier>{9aca7397-4302-4418-a953-e707537b7576}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="freeglut\fg_callbacks.c">
@@ -594,6 +618,171 @@
     <ClCompile Include="sound.c">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="ogg\bitwise.c">
+      <Filter>ソース ファイル\libogg</Filter>
+    </ClCompile>
+    <ClCompile Include="ogg\framing.c">
+      <Filter>ソース ファイル\libogg</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis\analysis.c">
+      <Filter>ソース ファイル\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis\bitrate.c">
+      <Filter>ソース ファイル\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis\block.c">
+      <Filter>ソース ファイル\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis\codebook.c">
+      <Filter>ソース ファイル\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis\envelope.c">
+      <Filter>ソース ファイル\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis\floor0.c">
+      <Filter>ソース ファイル\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis\floor1.c">
+      <Filter>ソース ファイル\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis\info.c">
+      <Filter>ソース ファイル\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis\lookup.c">
+      <Filter>ソース ファイル\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis\lpc.c">
+      <Filter>ソース ファイル\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis\lsp.c">
+      <Filter>ソース ファイル\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis\mapping0.c">
+      <Filter>ソース ファイル\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis\mdct.c">
+      <Filter>ソース ファイル\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis\psy.c">
+      <Filter>ソース ファイル\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis\registry.c">
+      <Filter>ソース ファイル\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis\res0.c">
+      <Filter>ソース ファイル\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis\sharedbook.c">
+      <Filter>ソース ファイル\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis\smallft.c">
+      <Filter>ソース ファイル\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis\synthesis.c">
+      <Filter>ソース ファイル\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis\vorbisenc.c">
+      <Filter>ソース ファイル\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis\window.c">
+      <Filter>ソース ファイル\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis\vorbisfile.c">
+      <Filter>ソース ファイル\vorbisfile</Filter>
+    </ClCompile>
+    <ClCompile Include="libFLAC\bitmath.c">
+      <Filter>ソース ファイル\libFLAC</Filter>
+    </ClCompile>
+    <ClCompile Include="libFLAC\bitreader.c">
+      <Filter>ソース ファイル\libFLAC</Filter>
+    </ClCompile>
+    <ClCompile Include="libFLAC\bitwriter.c">
+      <Filter>ソース ファイル\libFLAC</Filter>
+    </ClCompile>
+    <ClCompile Include="libFLAC\cpu.c">
+      <Filter>ソース ファイル\libFLAC</Filter>
+    </ClCompile>
+    <ClCompile Include="libFLAC\crc.c">
+      <Filter>ソース ファイル\libFLAC</Filter>
+    </ClCompile>
+    <ClCompile Include="libFLAC\fixed.c">
+      <Filter>ソース ファイル\libFLAC</Filter>
+    </ClCompile>
+    <ClCompile Include="libFLAC\fixed_intrin_sse2.c">
+      <Filter>ソース ファイル\libFLAC</Filter>
+    </ClCompile>
+    <ClCompile Include="libFLAC\fixed_intrin_ssse3.c">
+      <Filter>ソース ファイル\libFLAC</Filter>
+    </ClCompile>
+    <ClCompile Include="libFLAC\float.c">
+      <Filter>ソース ファイル\libFLAC</Filter>
+    </ClCompile>
+    <ClCompile Include="libFLAC\format.c">
+      <Filter>ソース ファイル\libFLAC</Filter>
+    </ClCompile>
+    <ClCompile Include="libFLAC\lpc.c">
+      <Filter>ソース ファイル\libFLAC</Filter>
+    </ClCompile>
+    <ClCompile Include="libFLAC\lpc_intrin_avx2.c">
+      <Filter>ソース ファイル\libFLAC</Filter>
+    </ClCompile>
+    <ClCompile Include="libFLAC\lpc_intrin_sse.c">
+      <Filter>ソース ファイル\libFLAC</Filter>
+    </ClCompile>
+    <ClCompile Include="libFLAC\lpc_intrin_sse2.c">
+      <Filter>ソース ファイル\libFLAC</Filter>
+    </ClCompile>
+    <ClCompile Include="libFLAC\lpc_intrin_sse41.c">
+      <Filter>ソース ファイル\libFLAC</Filter>
+    </ClCompile>
+    <ClCompile Include="libFLAC\md5.c">
+      <Filter>ソース ファイル\libFLAC</Filter>
+    </ClCompile>
+    <ClCompile Include="libFLAC\memory.c">
+      <Filter>ソース ファイル\libFLAC</Filter>
+    </ClCompile>
+    <ClCompile Include="libFLAC\metadata_iterators.c">
+      <Filter>ソース ファイル\libFLAC</Filter>
+    </ClCompile>
+    <ClCompile Include="libFLAC\metadata_object.c">
+      <Filter>ソース ファイル\libFLAC</Filter>
+    </ClCompile>
+    <ClCompile Include="libFLAC\ogg_decoder_aspect.c">
+      <Filter>ソース ファイル\libFLAC</Filter>
+    </ClCompile>
+    <ClCompile Include="libFLAC\ogg_encoder_aspect.c">
+      <Filter>ソース ファイル\libFLAC</Filter>
+    </ClCompile>
+    <ClCompile Include="libFLAC\ogg_helper.c">
+      <Filter>ソース ファイル\libFLAC</Filter>
+    </ClCompile>
+    <ClCompile Include="libFLAC\ogg_mapping.c">
+      <Filter>ソース ファイル\libFLAC</Filter>
+    </ClCompile>
+    <ClCompile Include="libFLAC\stream_decoder.c">
+      <Filter>ソース ファイル\libFLAC</Filter>
+    </ClCompile>
+    <ClCompile Include="libFLAC\stream_encoder.c">
+      <Filter>ソース ファイル\libFLAC</Filter>
+    </ClCompile>
+    <ClCompile Include="libFLAC\stream_encoder_framing.c">
+      <Filter>ソース ファイル\libFLAC</Filter>
+    </ClCompile>
+    <ClCompile Include="libFLAC\stream_encoder_intrin_avx2.c">
+      <Filter>ソース ファイル\libFLAC</Filter>
+    </ClCompile>
+    <ClCompile Include="libFLAC\stream_encoder_intrin_sse2.c">
+      <Filter>ソース ファイル\libFLAC</Filter>
+    </ClCompile>
+    <ClCompile Include="libFLAC\stream_encoder_intrin_ssse3.c">
+      <Filter>ソース ファイル\libFLAC</Filter>
+    </ClCompile>
+    <ClCompile Include="libFLAC\window.c">
+      <Filter>ソース ファイル\libFLAC</Filter>
+    </ClCompile>
+    <ClCompile Include="libFLAC\share\win_utf8_io\win_utf8_io.c">
+      <Filter>ソース ファイル\libFLAC\share</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="freeglut\mswin\fg_internal_mswin.h">
@@ -757,6 +946,96 @@
     </ClInclude>
     <ClInclude Include="sound.h">
       <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ogg\ogg.h">
+      <Filter>ヘッダー ファイル\libogg</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ogg\os_types.h">
+      <Filter>ヘッダー ファイル\libogg</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis\backends.h">
+      <Filter>ヘッダー ファイル\libvorbis</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis\bitrate.h">
+      <Filter>ヘッダー ファイル\libvorbis</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis\codebook.h">
+      <Filter>ヘッダー ファイル\libvorbis</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis\codec_internal.h">
+      <Filter>ヘッダー ファイル\libvorbis</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis\envelope.h">
+      <Filter>ヘッダー ファイル\libvorbis</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis\highlevel.h">
+      <Filter>ヘッダー ファイル\libvorbis</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis\lookup.h">
+      <Filter>ヘッダー ファイル\libvorbis</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis\lookup_data.h">
+      <Filter>ヘッダー ファイル\libvorbis</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis\lpc.h">
+      <Filter>ヘッダー ファイル\libvorbis</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis\lsp.h">
+      <Filter>ヘッダー ファイル\libvorbis</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis\masking.h">
+      <Filter>ヘッダー ファイル\libvorbis</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis\mdct.h">
+      <Filter>ヘッダー ファイル\libvorbis</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis\misc.h">
+      <Filter>ヘッダー ファイル\libvorbis</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis\os.h">
+      <Filter>ヘッダー ファイル\libvorbis</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis\psy.h">
+      <Filter>ヘッダー ファイル\libvorbis</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis\registry.h">
+      <Filter>ヘッダー ファイル\libvorbis</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis\scales.h">
+      <Filter>ヘッダー ファイル\libvorbis</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis\smallft.h">
+      <Filter>ヘッダー ファイル\libvorbis</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis\window.h">
+      <Filter>ヘッダー ファイル\libvorbis</Filter>
+    </ClInclude>
+    <ClInclude Include="include\libFLAC\FLAC\all.h">
+      <Filter>ヘッダー ファイル\libFLAC</Filter>
+    </ClInclude>
+    <ClInclude Include="include\libFLAC\FLAC\assert.h">
+      <Filter>ヘッダー ファイル\libFLAC</Filter>
+    </ClInclude>
+    <ClInclude Include="include\libFLAC\FLAC\callback.h">
+      <Filter>ヘッダー ファイル\libFLAC</Filter>
+    </ClInclude>
+    <ClInclude Include="include\libFLAC\FLAC\export.h">
+      <Filter>ヘッダー ファイル\libFLAC</Filter>
+    </ClInclude>
+    <ClInclude Include="include\libFLAC\FLAC\format.h">
+      <Filter>ヘッダー ファイル\libFLAC</Filter>
+    </ClInclude>
+    <ClInclude Include="include\libFLAC\FLAC\metadata.h">
+      <Filter>ヘッダー ファイル\libFLAC</Filter>
+    </ClInclude>
+    <ClInclude Include="include\libFLAC\FLAC\ordinals.h">
+      <Filter>ヘッダー ファイル\libFLAC</Filter>
+    </ClInclude>
+    <ClInclude Include="include\libFLAC\FLAC\stream_decoder.h">
+      <Filter>ヘッダー ファイル\libFLAC</Filter>
+    </ClInclude>
+    <ClInclude Include="include\libFLAC\FLAC\stream_encoder.h">
+      <Filter>ヘッダー ファイル\libFLAC</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
