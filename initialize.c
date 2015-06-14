@@ -20,7 +20,7 @@
 #include "task_common.h"
 #include "configure.h"
 
-int InitializeGameData(int argc, char** argv)
+int InitializeGameData(int argc, char** argv, GAME_DATA* game_data)
 {
 	DRAW_VERTEX vertices[4] =
 	{
@@ -30,8 +30,7 @@ int InitializeGameData(int argc, char** argv)
 		{{1, 1, 0}, {1, 0}, {255, 255, 255, 255}}
 	};
 	unsigned char indices[] ={0, 1, 2, 3};
-
-	GAME_DATA *game_data = GetGameData();
+	FILE *fp;
 
 	(void)memset(game_data, 0, sizeof(*game_data));
 
@@ -42,6 +41,16 @@ int InitializeGameData(int argc, char** argv)
 	glutInitWindowSize(640, 360);
 
 	(void)glutCreateWindow("GAME TEST");
+
+	fp = fopen("./test.bin", "rb");
+	if(InitializeFileArchive(&game_data->file_archive, "./test.bin", (void*)fp,
+		(size_t(*)(void*, size_t, size_t, void*))fread,
+		(int(*)(void*, long, int))fseek,
+		(long(*)(void*))ftell,
+		(int(*)(void*))fclose) == FALSE)
+	{
+		return FALSE;
+	}
 
 	InitializeTextDrawFromFile(&game_data->display_data.text_draw, "./font_1_honokamin.ttf");
 	TextDrawSetCharacterSize(&game_data->display_data.text_draw, 80, 80);
@@ -83,24 +92,11 @@ int InitializeGameData(int argc, char** argv)
 	);
 
 	{
-		/*
 		PriorityArrayAppend(&game_data->display_data.draw_items,
 			DrawSquareItemNew(
-			ImageTextureNew("test.jpg",
-				FileOpen, fread, fseek, ftell, FileClose, game_data, &game_data->display_data.textures),
-			0, 0,
-			0.33f,
-			0,
-			RGBA(0xFF, 0xFF, 0xFF, 0xFF),
-			&game_data->display_data.programs),
-			0
-		);
-		*/
-
-		PriorityArrayAppend(&game_data->display_data.draw_items,
-			DrawSquareItemNew(
-			ImageTextureNew("test.png",
-				FileOpen, fread, fseek, ftell, FileClose, game_data, &game_data->display_data.textures),
+			ImageTextureNew("images/ritsu.png",
+				FileArchiveReadNew, FileArchiveRead, FileArchiveSeek, FileArchiveTell, DeleteFileArchiveRead,
+					&game_data->file_archive, &game_data->display_data.textures),
 			300, 260,
 			2,
 			0,
@@ -110,25 +106,37 @@ int InitializeGameData(int argc, char** argv)
 		);
 
 		PriorityArrayAppend(&game_data->display_data.draw_items,
-			DrawSquareItemNew(
-			ImageTextureNew("flame.png",
-				FileOpen, fread, fseek, ftell, FileClose, game_data, &game_data->display_data.textures),
-			500, 260,
-			1,
+			ClipDrawItemNew(
+			SquareTextureNew(240, 360),
+			ImageTextureNew("images/ritsu.png",
+				FileArchiveReadNew, FileArchiveRead, FileArchiveSeek, FileArchiveTell, DeleteFileArchiveRead,
+					&game_data->file_archive, &game_data->display_data.textures),
+			300, 260,
+			NULL, NULL,
+			2,
+			2,
 			0,
-			RGBA(0xFF, 0xFF, 0xFF, 0xFF),
+			0,
+			0,
 			&game_data->display_data.programs),
 			0
 		);
 
 		PriorityArrayAppend(&game_data->display_data.draw_items,
-			DrawSquareItemNew(
-			ImageTextureNew("flame_blue.png",
-				FileOpen, fread, fseek, ftell, FileClose, game_data, &game_data->display_data.textures),
-			500, 260,
+			ClipDrawItemNew(
+			ImageTextureNew("images/upper_effect.png",
+				FileArchiveReadNew, FileArchiveRead, FileArchiveSeek, FileArchiveTell, DeleteFileArchiveRead,
+					&game_data->file_archive, &game_data->display_data.textures),
+			ImageTextureNew("images/ritsu.png",
+				FileArchiveReadNew, FileArchiveRead, FileArchiveSeek, FileArchiveTell, DeleteFileArchiveRead,
+					&game_data->file_archive, &game_data->display_data.textures),
+			300, 260,
+			NULL, NULL,
 			1,
+			2,
 			0,
-			RGBA(0x00, 0x00, 0x00, 0x00),
+			0,
+			0,
 			&game_data->display_data.programs),
 			0
 		);

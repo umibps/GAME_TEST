@@ -4,6 +4,8 @@
 void TestTask(TASK* task)
 {
 	GAME_DATA *game_data = task->tasks->game_data;
+	static int speed = 0;
+	static int mode = 0;
 	int i;
 
 	for(i=0; i<(int)game_data->display_data.draw_items.num_data; i++)
@@ -13,79 +15,58 @@ void TestTask(TASK* task)
 	}
 
 	{
-		DRAW_SQUARE_ITEM *item1 = (DRAW_SQUARE_ITEM*)game_data->display_data.draw_items.buffer[1].data;
-		DRAW_SQUARE_ITEM *item2 = (DRAW_SQUARE_ITEM*)game_data->display_data.draw_items.buffer[2].data;
-		static int zoom = 100;
-		static int direction = 4;
+		DRAW_SQUARE_ITEM *item0 = (DRAW_SQUARE_ITEM*)game_data->display_data.draw_items.buffer[0].data;
+		CLIP_DRAW_ITEM *item1 = (CLIP_DRAW_ITEM*)game_data->display_data.draw_items.buffer[1].data;
+		CLIP_DRAW_ITEM *item2 = (CLIP_DRAW_ITEM*)game_data->display_data.draw_items.buffer[2].data;
+		
+		SetTextureWrap(item2->texture->id, GL_REPEAT);
 
-		item1->zoom = item2->zoom = zoom * 0.01f;
-		zoom += direction;
-		if(zoom > 300 || zoom < 50)
-		{
-			direction = -direction;
-		}
-		item1->rotate += (float)M_PI * 3 / 180.0f;
-		item2->rotate += (float)M_PI * 3 / 180.0f;
-
-		if(game_data->input.current_input & BUTTON_FLAG_UP)
-		{
-			item1->y -= 5;
-			item2->y -= 5;
-		}
-		if(game_data->input.current_input & BUTTON_FLAG_DOWN)
-		{
-			item1->y += 5;
-			item2->y += 5;
-		}
-		if(game_data->input.current_input & BUTTON_FLAG_LEFT)
-		{
-			item1->x -= 5;
-			item2->x -= 5;
-		}
-		if(game_data->input.current_input & BUTTON_FLAG_RIGHT)
-		{
-			item1->x += 5;
-			item2->x += 5;
-		}
 		if(game_data->input.input_down & BUTTON_FLAG_0)
 		{
-			if(item1->color == 0xFFFFFFFF)
+			speed = 0;
+			if(mode == 0)
 			{
-				item1->color = 0x00000000;
-				item2->color = 0xFFFFFFFF;
+				if((item1->color & 0xFF) < 180)
+				{
+					item1->color = RGBA(0xFF, 0x33, 0x33, (item1->color & 0xFF) + 2);
+					item2->color = RGBA(0xFF, 0xFF, 0x44, (item2->color & 0xFF) + 2);
+				}
+
+				AddSound(&game_data->sounds, "sounds/voice.flac", FileArchiveReadNew,
+					FileArchiveRead, FileArchiveSeek, FileArchiveTell, DeleteFileArchiveRead,
+						SOUND_PLAY_NO_FLAG, &game_data->file_archive);
+				mode = 1;
 			}
 			else
 			{
-				item1->color = 0xFFFFFFFF;
-				item2->color = 0x00000000;
+				mode = 0;
+				item1->color = 0;
+				item2->color = 0;
 			}
 		}
-		if(game_data->input.input_down & BUTTON_FLAG_1)
-		{
-			AddSound(&game_data->sounds,
-				"test.ogg",
-				fopen,
-				fread,
-				fseek,
-				ftell,
-				fclose,
-				SOUND_PLAY_NO_FLAG,
-				NULL
-	);
-		}
-	}
-}
 
-void SoundTestTask(TASK* task)
-{
-	PlaySound((SOUND_PLAY_BASE*)task->data);
+		if((item1->color & 0xFF) > 0 && (item1->color & 0xFF) < 180)
+		{
+			if((item1->color & 0xFF) % 6 == 0)
+			{
+				speed++;
+			}
+			item1->color = RGBA(0xFF, 0x33, 0x33, (item1->color & 0xFF) + 2);
+			item2->color = RGBA(0xFF, 0xFF, 0x88, (item2->color & 0xFF) + 2);
+		}
+
+		item2->texture_position[0][1] += speed;
+		item2->texture_position[1][1] += speed;
+
+		PlayAllSound(&game_data->sounds);
+	}
 }
 
 int main(int argc, char** argv)
 {
 	GAME_DATA *game_data;
 
-	if(InitializeGameData(argc, argv) == FALSE)
+	if(InitializeGameData(argc, argv, GetGameData()) == FALSE)
 	{
 		return 1;
 	}
@@ -97,16 +78,6 @@ int main(int argc, char** argv)
 		NULL,
 		0x1000,
 		0
-	);
-	AddSound(&game_data->sounds,
-		"test_bgm.flac",
-		fopen,
-		fread,
-		fseek,
-		ftell,
-		fclose,
-		SOUND_PLAY_FLAG_LOOP_PLAY,
-		NULL
 	);
 
 	glutMainLoop();

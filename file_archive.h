@@ -30,6 +30,8 @@ typedef struct _FILE_ARCHIVE
 	int (*seek_func)(void*, long, int);
 	// 読み込み位置取得用の関数ポインタ
 	long (*tell_func)(void*);
+    // アーカイブを閉じる際に使う関数ポインタ
+    int (*close_func)(void*);
 } FILE_ARCHIVE;
 
 /*
@@ -51,6 +53,13 @@ extern "C" {
  InitializeFileArchive関数
  ファイルアーカイブ管理用データの初期化
  引数
+ archive        : アーカイブを管理する構造体のアドレス
+ archive_path   : アーカイブ・ファイルのパス
+ stream         : アーカイブを読み込む為のデータ
+ read_func      : データ読み込みに使う関数ポインタ
+ seek_func      : データのシークに使う関数ポインタ
+ tell_func      : データのシーク位置取得に使う関数ポインタ
+ close_func     : アーカイブを閉じる際に使う関数ポインタ
  返り値
 	正常終了:TRUE	異常終了:FALSE
 */
@@ -60,7 +69,8 @@ EXTERN int InitializeFileArchive(
 	void* stream,
 	size_t (*read_func)(void*, size_t, size_t, void*),
 	int (*seek_func)(void*, long, int),
-	long (*tell_func)(void*)
+    long (*tell_func)(void*),
+    int (*close_func)(void*)
 );
 
 /*

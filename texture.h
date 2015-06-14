@@ -55,6 +55,15 @@ EXTERN GLuint GenerateTexture(
 );
 
 /*
+ SetTextureWrap関数
+ テクスチャのはみ出し部の扱いを設定する
+ 引数
+ texture_id	: テクスチャオブジェクトのID
+ wrap_mode	: 繰り返し:GL_REPEAT, クリッピング:GL_CLAMP
+*/
+EXTERN void SetTextureWrap(GLuint texture_id, GLenum wrap_mode);
+
+/*
  InitializeTexture2D関数
  2Dテクスチャを生成し初期化する
  引数
@@ -128,6 +137,22 @@ EXTERN int InitializeTextTexture(
 );
 
 /*
+ TextTextureNew関数
+ テキストのテクスチャをメモリを確保して生成する
+ 引数
+ text_draw		: テキストの描画を管理するデータ
+ utf8_text		: 描画するテキスト
+ num_character	: 描画する文字数
+ 返り値
+	生成したテクスチャのデータ(不要になったらMEM_FREE_FUNC)
+*/
+EXTERN TEXTURE_BASE* TextTextureNew(
+	TEXT_DRAW* text_draw,
+	const char* utf8_text,
+	int num_character
+);
+
+/*
  ImageTextureNew関数
  画像ファイルからテクスチャをダブり防止して作成する
  引数
@@ -142,6 +167,33 @@ EXTERN TEXTURE_BASE* ImageTextureNew(
 	void* user_data,
 	IMAGE_TEXTURES* textures
 );
+
+/*
+ InitializeSquareTexture関数
+ 長方形のテクスチャを生成する
+ 引数
+ texture	: テクスチャの基本データ構造体
+ width		: 長方形の幅
+ height		: 長方形の高さ
+ 返り値
+	成功:TRUE	失敗:FALSE
+*/
+EXTERN int InitializeSquareTexture(
+	TEXTURE_BASE* texture,
+	int width,
+	int height
+);
+
+/*
+ SquareTextureNew関数
+ 長方形のテクスチャをメモリを確保して生成する
+ 引数
+ width	: 長方形の幅
+ height	: 長方形の高さ
+ 返り値
+	生成したテクスチャのデータ(不要になったらMEM_FREE_FUNC)
+*/
+EXTERN TEXTURE_BASE* SquareTextureNew(int width, int height);
 
 /*
  InitializeImageTextures関数

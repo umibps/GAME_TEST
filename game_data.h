@@ -11,6 +11,7 @@
 #include "task.h"
 #include "utils.h"
 #include "sound.h"
+#include "file_archive.h"
 
 /*
  GAME_DATA構造体
@@ -23,6 +24,7 @@ struct _GAME_DATA
 	GAME_INPUT input;				// 入力処理用のデータ
 	SOUND_CONTEXT sound_context;	// 音声再生用の基本的なデータ
 	SOUNDS sounds;					// BGM, 効果音全体のデータ
+	FILE_ARCHIVE file_archive;		// ゲーム用データのアーカイブ
 };
 
 #ifdef __cplusplus

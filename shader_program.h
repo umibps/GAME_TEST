@@ -53,12 +53,51 @@ typedef struct _DRAW_SQUARE_PROGRAM
 } DRAW_SQUARE_PROGRAM;
 
 /*
+ CLIP_DRAW_SQUARE_PROGRAM構造体
+ 画像でクリッピングして描画する場合のデータ
+*/
+typedef struct _CLIP_DRAW_PROGRAM
+{
+	SHADER_PROGRAM_BASE base_data;						// シェーダープログラムの基本データ
+	VERTEX_BUFFER vertex_buffer;						// (0, 1)のみの頂点バッファ
+	GLint position_uniform_location;					// 描画する座標を入れる
+														// 頂点シェーダープログラムの変数識別ID
+	GLint texture_position_uniform_location;			// テクスチャ座標を指定する
+														// 頂点シェーダープログラムの変数識別ID
+	GLint clip_position_uniform_location;				// クリッピングに使う画像の座標を指定する
+														// 頂点シェーダープログラムの変数識別ID
+	GLint texture_size_uniform_location;				// テクスチャ画像のサイズを入れる
+														// 頂点シェーダープログラムの変数識別ID
+	GLint clip_size_uniform_location;					// クリッピングに使う画像のサイズを入れる
+														// 頂点シェーダープログラムの変数識別ID
+	GLint reverse_half_display_size_unifrom_location;	// 画像サイズと指定座標からOpenGLでの座標を計算する
+														// 頂点シェーダープログラムの変数識別ID
+	GLint display_height_uniform_location;				// 描画領域の高さを指定する
+														// 頂点シェーダープログラムの変数識別ID
+	GLint zoom_uniform_location;						// X方向及びY方向の拡大率を入れる
+														// 頂点シェーダープログラムの変数識別ID
+	GLint clip_zoom_uniform_location;					// クリッピングに使う画像のX方向及びY方向の拡大率を入れる
+														// 頂点シェーダープログラムの変数識別ID
+	GLint rotate_uniform_location;						// 画像の回転角を入れる
+														// 頂点シェーダープログラムの変数識別ID
+	GLint clip_rotate_uniform_location;					// クリッピングに使う画像の回転角を入れる
+														// 頂点シェーダープログラムの変数識別ID
+	GLint color_uniform_location;						// 画像の色を指定する
+														// フラグメントシェーダープログラムの変数識別ID
+	GLint texture_uniform_location;						// 使用するテクスチャユニットのIDを指定する
+														// フラグメントシェーダープログラムの変数識別ID
+	GLint clip_texture_uniform_location;				// クリッピングに使用するテクスチャユニットのIDを指定する
+														// フラグメントシェーダープログラムの変数識別ID
+} CLIP_DRAW_PROGRAM;
+
+/*
  DISPLAY_PROGRAMS構造体
  使用するシェーダープログラムの集合体
 */
 typedef struct _DISPLAY_PROGRAMS
 {
 	DRAW_SQUARE_PROGRAM draw_square;
+	CLIP_DRAW_PROGRAM clip_draw;
 } DISPLAY_PROGRAMS;
 
 #ifdef __cplusplus

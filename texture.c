@@ -42,12 +42,16 @@ GLuint GenerateTexture(
 	}
 
 	// 生成したテクスチャを呼び出し
-		// (テクスチャの設定とピクセルデータの引き渡しを行うため
+		// (テクスチャの設定とピクセルデータの引き渡しを行うため)
 	glBindTexture(GL_TEXTURE_2D, texture_id);
 
 	// テクスチャを拡大・縮小したときの設定(線形補間)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	// 指定されたテクスチャ座標が0～1をはみ出した際の描画方法(クリッピング)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
 	// 画像のチャンネル数で処理を切り替え
 	switch(channel)
@@ -102,6 +106,27 @@ GLuint GenerateTexture(
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	return texture_id;
+}
+
+/*
+ SetTextureWrap関数
+ テクスチャのはみ出し部の扱いを設定する
+ 引数
+ texture_id	: テクスチャオブジェクトのID
+ wrap_mode	: 繰り返し:GL_REPEAT, クリッピング:GL_CLAMP
+*/
+void SetTextureWrap(GLuint texture_id, GLenum wrap_mode)
+{
+	// 指定されたテクスチャを呼び出し
+		// (テクスチャの設定を行うため)
+	glBindTexture(GL_TEXTURE_2D, texture_id);
+
+	// 設定を実行
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap_mode);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap_mode);
+	
+	// テクスチャの呼び出しを終了
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 /*
@@ -261,14 +286,24 @@ int InitializeImageTexture(
  ImageTextureNew関数
  画像ファイルからテクスチャをダブり防止して作成する
  引数
+ path		: 画像ファイルのパス
+ open_func	: ファイルを開く為に使う関数ポインタ
+ read_func	: データの読み込みに使う関数ポインタ
+ seek_func	: データのシークに使う関数ポインタ
+ tell_func	: データのシーク位置取得用の関数ポインタ
+ close_func	: ファイルを閉じる為に使う関数ポインタ
+ user_data	: ファイルを開く際に使う外部データ
+ textures	: テクスチャ全体を管理するデータ
+ 返り値
+	生成したテクスチャのデータ(不要になったらMEM_FREE_FUNC)
 */
 TEXTURE_BASE* ImageTextureNew(
 	const char* path,
 	void* (*open_func)(const char*, const char*, void*),
 	size_t(*read_func)(void*, size_t, size_t, void*),
-	int(*seek_func)(void*, long, int),
-	long(*tell_func)(void*),
-	int(*close_func)(void*, void*),
+	int (*seek_func)(void*, long, int),
+	long (*tell_func)(void*),
+	int (*close_func)(void*, void*),
 	void* user_data,
 	IMAGE_TEXTURES* textures
 )
@@ -322,6 +357,84 @@ int InitializeTextTexture(
 	}
 
 	return FALSE;
+}
+
+/*
+ TextTextureNew関数
+ テキストのテクスチャをメモリを確保して生成する
+ 引数
+ text_draw		: テキストの描画を管理するデータ
+ utf8_text		: 描画するテキスト
+ num_character	: 描画する文字数
+ 返り値
+	生成したテクスチャのデータ(不要になったらMEM_FREE_FUNC)
+*/
+TEXTURE_BASE* TextTextureNew(
+	TEXT_DRAW* text_draw,
+	const char* utf8_text,
+	int num_character
+)
+{
+	TEXTURE_BASE *texture = (TEXTURE_BASE*)MEM_ALLOC_FUNC(sizeof(*texture));
+
+	if(InitializeTextTexture(texture, text_draw, utf8_text, num_character) == FALSE)
+	{
+		MEM_FREE_FUNC(texture);
+		return NULL;
+	}
+
+	return texture;
+}
+
+/*
+ InitializeSquareTexture関数
+ 長方形のテクスチャを生成する
+ 引数
+ texture	: テクスチャの基本データ構造体
+ width		: 長方形の幅
+ height		: 長方形の高さ
+ 返り値
+	成功:TRUE	失敗:FALSE
+*/
+int InitializeSquareTexture(
+	TEXTURE_BASE* texture,
+	int width,
+	int height
+)
+{
+	uint8 *pixels;
+
+	if((pixels = (uint8*)MEM_ALLOC_FUNC(width * height * 4)) != NULL)
+	{
+		(void)memset(pixels, 0xFF, width * height * 4);
+		InitializeTexture2D(texture, pixels, NULL, width, height, 4);
+		MEM_FREE_FUNC(pixels);
+		return texture->id != 0;
+	}
+
+	return FALSE;
+}
+
+/*
+ SquareTextureNew関数
+ 長方形のテクスチャをメモリを確保して生成する
+ 引数
+ width	: 長方形の幅
+ height	: 長方形の高さ
+ 返り値
+	生成したテクスチャのデータ(不要になったらMEM_FREE_FUNC)
+*/
+TEXTURE_BASE* SquareTextureNew(int width, int height)
+{
+	TEXTURE_BASE *texture = (TEXTURE_BASE*)MEM_ALLOC_FUNC(sizeof(*texture));
+
+	if(InitializeSquareTexture(texture, width, height) == FALSE)
+	{
+		MEM_FREE_FUNC(texture);
+		return NULL;
+	}
+
+	return texture;
 }
 
 /*

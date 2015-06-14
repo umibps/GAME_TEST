@@ -778,7 +778,7 @@ static void FlacMetadataCallback(
 			sound_play->base_data.context,
 			(size_t (*)(uint8*, size_t, SOUND_PLAY_BASE*))GetFlacSoundData,
 			(int(*)(SOUND_PLAY_BASE*, FLOAT_T))TimeSeekFlacSound,
-			(void (*)(SOUND_PLAY_BASE*))OnDeleteVorbisSound,
+			(void (*)(SOUND_PLAY_BASE*))OnDeleteFlacSound,
 			format,
 			metadata->data.stream_info.sample_rate,
 			sound_play->base_data.play_flags

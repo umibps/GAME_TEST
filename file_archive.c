@@ -11,6 +11,13 @@ extern "C" {
  InitializeFileArchive関数
  ファイルアーカイブ管理用データの初期化
  引数
+ archive        : アーカイブを管理する構造体のアドレス
+ archive_path   : アーカイブ・ファイルのパス
+ stream         : アーカイブを読み込む為のデータ
+ read_func      : データ読み込みに使う関数ポインタ
+ seek_func      : データのシークに使う関数ポインタ
+ tell_func      : データのシーク位置取得に使う関数ポインタ
+ close_func     : アーカイブを閉じる際に使う関数ポインタ
  返り値
 	正常終了:TRUE	異常終了:FALSE
 */
@@ -20,7 +27,8 @@ int InitializeFileArchive(
 	void* stream,
 	size_t (*read_func)(void*, size_t, size_t, void*),
 	int (*seek_func)(void*, long, int),
-	long (*tell_func)(void*)
+    long (*tell_func)(void*),
+    int (*close_func)(void*)
 )
 {
 	uint8 data[8];
@@ -38,6 +46,7 @@ int InitializeFileArchive(
 	archive->read_func = read_func;
 	archive->seek_func = seek_func;
 	archive->tell_func = tell_func;
+    archive->close_func = close_func;
 
 	// ファイルの数を読み込む
 	(void)read_func(data, 1, 4, stream);
@@ -93,10 +102,19 @@ void ReleaseFileArchive(FILE_ARCHIVE* archive)
 	MEM_FREE_FUNC(archive->files);
 
 	archive->num_files = 0;
+
+	if(archive->close_func != NULL)
+	{
+		(void)archive->close_func(archive->stream);
+	}
 }
 
 static int CompareFileArchiveItem(const FILE_ARCHIVE_ITEM* item1, const FILE_ARCHIVE_ITEM* item2)
 {
+    if(item2->hash_value > item1->hash_value)
+    {
+        return -1;
+    }
 	return item1->hash_value - item2->hash_value;
 }
 
@@ -130,7 +148,7 @@ FILE_ARCHIVE_READ* FileArchiveReadNew(const char* path, const char* mode, FILE_A
 
 	ret->item_data = archive->files[id];
 	ret->current_position = 0;
-	ret->archive = archive;
+    ret->archive = archive;
 
 	return ret;
 }
@@ -172,7 +190,7 @@ size_t FileArchiveRead(void* buffer, size_t block_size, size_t num_blocks, FILE_
 
 	// 読み込むバイト数を計算
 	num_read = (archive_item->current_position + block_size * num_blocks <= archive_item->item_data.data_size)
-		? num_blocks : (archive_item->item_data.data_size - archive_item->current_position + block_size * num_blocks) / block_size;
+		? num_blocks : (archive_item->item_data.data_size - archive_item->current_position) / block_size;
 
 	// データ読み込み位置を更新
 	archive_item->current_position += (int)(num_read * block_size);

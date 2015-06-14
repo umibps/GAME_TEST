@@ -43,6 +43,15 @@ void SetUpStateOfOpenGL(GAME_DATA* game_data)
 	// αブレンドの方法
 		// 新しく描画されるポリゴンの不透明度に合わせて描画する
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	// テクスチャの有効化
+	glActiveTexture(GL_TEXTURE0);
+	glEnable(GL_TEXTURE_2D);
+	glActiveTexture(GL_TEXTURE1);
+	glEnable(GL_TEXTURE_2D);
+	glActiveTexture(GL_TEXTURE2);
+	glEnable(GL_TEXTURE_2D);
+	glActiveTexture(GL_TEXTURE0);
 }
 
 /*

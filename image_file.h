@@ -42,8 +42,8 @@ EXTERN uint8* ReadPngStream(
 */
 EXTERN void WritePngStream(
 	void* stream,
-	size_t(*write_func)(void*, size_t, size_t, void*),
-	void(*flush_func)(void*),
+	size_t (*write_func)(void*, size_t, size_t, void*),
+	void (*flush_func)(void*),
 	uint8* pixels,
 	int width,
 	int height,
