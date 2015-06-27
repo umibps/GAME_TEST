@@ -177,6 +177,14 @@ EXTERN void PriorityArrayRemove(
 );
 
 /*
+ PriorityArrayReset関数
+ 優先度付き配列の内容をリセットする
+ 引数
+ priority_array	: 優先度付き配列
+*/
+EXTERN void PriorityArrayReset(PRIORITY_ARRAY* priority_array);
+
+/*
  GetStringHashValue関数
  文字列のハッシュ値を取得する
  引数

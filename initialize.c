@@ -92,54 +92,41 @@ int InitializeGameData(int argc, char** argv, GAME_DATA* game_data)
 	);
 
 	{
-		PriorityArrayAppend(&game_data->display_data.draw_items,
-			DrawSquareItemNew(
-			ImageTextureNew("images/ritsu.png",
-				FileArchiveReadNew, FileArchiveRead, FileArchiveSeek, FileArchiveTell, DeleteFileArchiveRead,
-					&game_data->file_archive, &game_data->display_data.textures),
-			300, 260,
-			2,
-			0,
-			RGBA(0xFF, 0xFF, 0xFF, 0xFF),
-			&game_data->display_data.programs),
-			0
-		);
+		char file_name[256];
+		int num_texture = 0;
+		int i;
 
-		PriorityArrayAppend(&game_data->display_data.draw_items,
-			ClipDrawItemNew(
-			SquareTextureNew(240, 360),
-			ImageTextureNew("images/ritsu.png",
+		for(i=1; i<=13; i++)
+		{
+			(void)sprintf(file_name, "images/c%02d.png", i);
+			game_data->textures[num_texture++] = ImageTextureNew(file_name,
 				FileArchiveReadNew, FileArchiveRead, FileArchiveSeek, FileArchiveTell, DeleteFileArchiveRead,
-					&game_data->file_archive, &game_data->display_data.textures),
-			300, 260,
-			NULL, NULL,
-			2,
-			2,
-			0,
-			0,
-			0,
-			&game_data->display_data.programs),
-			0
-		);
-
-		PriorityArrayAppend(&game_data->display_data.draw_items,
-			ClipDrawItemNew(
-			ImageTextureNew("images/upper_effect.png",
+					&game_data->file_archive, &game_data->display_data.textures);
+		}
+		for(i=1; i<=13; i++)
+		{
+			(void)sprintf(file_name, "images/d%02d.png", i);
+			game_data->textures[num_texture++] = ImageTextureNew(file_name,
 				FileArchiveReadNew, FileArchiveRead, FileArchiveSeek, FileArchiveTell, DeleteFileArchiveRead,
-					&game_data->file_archive, &game_data->display_data.textures),
-			ImageTextureNew("images/ritsu.png",
+					&game_data->file_archive, &game_data->display_data.textures);
+		}
+		for(i=1; i<=13; i++)
+		{
+			(void)sprintf(file_name, "images/h%02d.png", i);
+			game_data->textures[num_texture++] = ImageTextureNew(file_name,
 				FileArchiveReadNew, FileArchiveRead, FileArchiveSeek, FileArchiveTell, DeleteFileArchiveRead,
-					&game_data->file_archive, &game_data->display_data.textures),
-			300, 260,
-			NULL, NULL,
-			1,
-			2,
-			0,
-			0,
-			0,
-			&game_data->display_data.programs),
-			0
-		);
+					&game_data->file_archive, &game_data->display_data.textures);
+		}
+		for(i=1; i<=13; i++)
+		{
+			(void)sprintf(file_name, "images/s%02d.png", i);
+			game_data->textures[num_texture++] = ImageTextureNew(file_name,
+				FileArchiveReadNew, FileArchiveRead, FileArchiveSeek, FileArchiveTell, DeleteFileArchiveRead,
+					&game_data->file_archive, &game_data->display_data.textures);
+		}
+		game_data->textures[num_texture++] = ImageTextureNew("images/x01.png",
+			FileArchiveReadNew, FileArchiveRead, FileArchiveSeek, FileArchiveTell, DeleteFileArchiveRead,
+					&game_data->file_archive, &game_data->display_data.textures);
 	}
 
 	return TRUE;

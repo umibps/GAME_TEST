@@ -25,6 +25,8 @@ struct _GAME_DATA
 	SOUND_CONTEXT sound_context;	// 音声再生用の基本的なデータ
 	SOUNDS sounds;					// BGM, 効果音全体のデータ
 	FILE_ARCHIVE file_archive;		// ゲーム用データのアーカイブ
+	TEXTURE_BASE *textures[60];		// トランプテクスチャ
+	int order[53];
 };
 
 #ifdef __cplusplus

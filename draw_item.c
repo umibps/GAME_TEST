@@ -61,6 +61,17 @@ static void DrawSquare(DRAW_SQUARE_ITEM* item)
 }
 
 /*
+ ReleaseDrawSquareItem関数
+ 画像全体を使って描画するアイテムの開放
+ 引数
+ item	: 削除するアイテム
+*/
+static void ReleaseDrawSquareItem(DRAW_SQUARE_ITEM* item)
+{
+	DeleteTexture2D(item->texture);
+}
+
+/*
  DeleteDrawSquareItem関数
  画像全体を使って描画するアイテムの削除
  引数
@@ -107,7 +118,7 @@ void InitializeDrawSquareItem(
 	item->program = &programs->draw_square;
 
 	item->base_data.draw = (void(*)(DRAW_ITEM_BASE*))DrawSquare;
-	item->base_data.delete_func = (void(*)(DRAW_ITEM_BASE*))DeleteDrawSquareItem;
+	item->base_data.delete_func = (void(*)(DRAW_ITEM_BASE*))ReleaseDrawSquareItem;
 }
 
 /*
@@ -192,6 +203,18 @@ static void ClipDraw(CLIP_DRAW_ITEM* item)
 	glBindVertexArray(0);
 
 	glUseProgram(0);
+}
+
+/*
+ ReleaseClipDrawItem関数
+ 画像でクリッピングして描画するアイテムの開放
+ 引数
+ item	: 削除するアイテム
+*/
+static void ReleaseClipDrawItem(CLIP_DRAW_ITEM* item)
+{
+	DeleteTexture2D(item->texture);
+	DeleteTexture2D(item->clip);
 }
 
 /*
@@ -283,7 +306,7 @@ void InitializeClipDrawItem(
 	item->program = &programs->clip_draw;
 
 	item->base_data.draw = (void(*)(DRAW_ITEM_BASE*))ClipDraw;
-	item->base_data.delete_func = (void(*)(DRAW_ITEM_BASE*))DeleteClipDrawItem;
+	item->base_data.delete_func = (void(*)(DRAW_ITEM_BASE*))ReleaseClipDrawItem;
 }
 
 /*

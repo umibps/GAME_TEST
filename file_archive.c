@@ -143,6 +143,13 @@ FILE_ARCHIVE_READ* FileArchiveReadNew(const char* path, const char* mode, FILE_A
 	{
 		return NULL;
 	}
+	else if(id == 0)
+	{
+		if(archive->files[0].hash_value != item.hash_value)
+		{
+			return NULL;
+		}
+	}
 
 	ret = (FILE_ARCHIVE_READ*)MEM_ALLOC_FUNC(sizeof(*ret));
 

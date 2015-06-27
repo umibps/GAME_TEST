@@ -311,6 +311,30 @@ void PriorityArrayRemove(
 }
 
 /*
+ PriorityArrayReset関数
+ 優先度付き配列の内容をリセットする
+ 引数
+ priority_array	: 優先度付き配列
+*/
+void PriorityArrayReset(PRIORITY_ARRAY* priority_array)
+{
+	unsigned int i;
+
+	if(priority_array->delete_func != NULL)
+	{
+		for(i=0; i<(unsigned int)priority_array->num_data; i++)
+		{
+			priority_array->delete_func(priority_array->buffer[i].data);
+		}
+	}
+
+	(void)memset(priority_array->buffer, 0,
+		sizeof(*priority_array->buffer)*priority_array->buffer_size);
+
+	priority_array->num_data = 0;
+}
+
+/*
  InitializeStringHashTable関数
  文字列をキーとするハッシュテーブルを初期化する
  引数
@@ -440,9 +464,13 @@ void* StringHashTableGet(
 	place = BinarySearch(hash_table->buffer, &item,
 		sizeof(item), (int)hash_table->num_data,
 		(int(*)(void*, void*, void*))CompareStringHashTableItem, NULL
-		);
+	);
 
 	if(place < 0)
+	{
+		return NULL;
+	}
+	else if(place == 0 && item.hash_value != hash_table->buffer[place].hash_value)
 	{
 		return NULL;
 	}

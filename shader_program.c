@@ -460,7 +460,6 @@ int InitializeClipDrawProgram(
 		"uniform sampler2D clip;\n"
 		"void main()\n"
 		"{\n"
-			"\tvec4 texture_color = texture(draw_texture, out_texture_coordinate);\n"
 			"\tout_pixel_color = color * mix(vec4(0), texture(draw_texture, out_texture_coordinate), texture(clip, out_clip_coordinate).a);\n"
 		"}\n";
 	// 頂点バッファ

@@ -130,6 +130,20 @@ void SetTextureWrap(GLuint texture_id, GLenum wrap_mode)
 }
 
 /*
+ TextureCountUpReference関数
+ テクスチャの参照カウントを増やす
+ 引数
+ texture	: 参照カウントを増やすテクスチャ
+ 返り値
+	参照カウントを増やしたテクスチャ
+*/
+TEXTURE_BASE* TextureCountUpReference(TEXTURE_BASE* texture)
+{
+	texture->reference_count++;
+	return texture;
+}
+
+/*
  InitializeTexture2D関数
  2Dテクスチャを生成し初期化する
  引数
@@ -161,6 +175,7 @@ void InitializeTexture2D(
 	texture->width = width;
 	texture->height = height;
 	texture->channel = channel;
+	texture->reference_count = 1;
 }
 
 /*

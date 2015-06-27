@@ -64,6 +64,16 @@ EXTERN GLuint GenerateTexture(
 EXTERN void SetTextureWrap(GLuint texture_id, GLenum wrap_mode);
 
 /*
+ TextureCountUpReference関数
+ テクスチャの参照カウントを増やす
+ 引数
+ texture	: 参照カウントを増やすテクスチャ
+ 返り値
+	参照カウントを増やしたテクスチャ
+*/
+EXTERN TEXTURE_BASE* TextureCountUpReference(TEXTURE_BASE* texture);
+
+/*
  InitializeTexture2D関数
  2Dテクスチャを生成し初期化する
  引数
