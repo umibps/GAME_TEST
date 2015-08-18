@@ -5,6 +5,19 @@
 #include "types.h"
 
 /*
+ POINTER_ARRAY構造体
+ 可変長のポインタ型配列
+*/
+typedef struct _POINTER_ARRAY
+{
+	void **buffer;					// 配列の実体
+	size_t buffer_size;				// 現在の配列のサイズ
+	size_t num_data;				// 現在保持しているデータの数
+	size_t block_size;				// 配列拡大時の更新幅
+	void (*delete_func)(void*);		// データ削除時に使う関数ポインタ
+} POINTER_ARRAY;
+
+/*
  PRIORITY_ARRAY_ITEM構造体
  優先度付き配列のひとつの項目
 */
@@ -106,6 +119,15 @@ EXTERN FILE* FileOpen(const char* path, const char* mode, void* user_data);
 EXTERN int FileClose(FILE* fp, void* user_data);
 
 /*
+ DefaultErrorMessage関数
+ デフォルトのエラー表示用関数
+ 引数
+ message	: 表示するメッセージ
+ dummy		: ダミーデータ
+*/
+extern void DefaultErrorMessage(const char* message, void* dummy);
+
+/*
  BinarySearch関数
  二分探索を実行する
  引数
@@ -127,6 +149,37 @@ EXTERN int BinarySearch(
 	int(*compare_func)(void*, void*, void*),
 	void* user_data
 );
+
+/*
+ InitializePointerArray関数
+ 可変長のポインタ型配列を初期化する
+ 引数
+ pointer_array	: 初期化する可変長ポインタ型配列
+ block_size		: 配列のバッファサイズ拡大時の更新幅
+ delete_func	: データ削除時に使う関数ポインタ
+*/
+EXTERN void InitializePointerArray(
+	POINTER_ARRAY* pointer_array,
+	size_t block_size,
+	void (*delete_func)(void*)
+);
+
+/*
+ ReleasePointerArray関数
+ 可変長ポインタ型配列を開放する
+ 引数
+ pointer_array	: 可変長ポインタ型配列
+*/
+EXTERN void ReleasePointerArray(POINTER_ARRAY* pointer_array);
+
+/*
+ PointerArrayAppend関数
+ 可変長ポインタ型配列にデータを追加する
+ 引数
+ pointer_array	: 可変長ポインタ型配列
+ data			: 追加するデータ
+*/
+EXTERN void PointerArrayAppend(POINTER_ARRAY* pointer_array, void* data);
 
 /*
  InitializePriorityArray関数
