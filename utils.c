@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdarg.h>
 #include <ctype.h>
 #include "utils.h"
 
@@ -88,6 +89,25 @@ int FileClose(FILE* fp, void* user_data)
 }
 
 /*
+ DefaultErrorMessage関数
+ デフォルトのエラー表示用関数
+ 引数
+ dummy		: ダミーデータ
+ message	: 表示するメッセージ
+ ...		: printfと同じ
+*/
+void DefaultErrorMessage(void* dummy, const char* message, ... )
+{
+	va_list list;
+	
+	va_start(list, message);
+
+	(void)vfprintf(stderr, message, list);
+
+	va_end(list);
+}
+
+/*
  BinarySearch関数
  二分探索を実行する
  引数
@@ -157,6 +177,69 @@ int BinarySearch(
 	}
 
 	return - maximum;
+}
+
+/*
+ InitializePointerArray関数
+ 可変長のポインタ型配列を初期化する
+ 引数
+ pointer_array	: 初期化する可変長ポインタ型配列
+ block_size		: 配列のバッファサイズ拡大時の更新幅
+ delete_func	: データ削除時に使う関数ポインタ
+*/
+void InitializePointerArray(
+	POINTER_ARRAY* pointer_array,
+	size_t block_size,
+	void (*delete_func)(void*)
+)
+{
+	(void)memset(pointer_array, 0, sizeof(*pointer_array));
+
+	pointer_array->block_size = pointer_array->buffer_size = block_size;
+	pointer_array->buffer = (void**)MEM_CALLOC_FUNC(block_size, sizeof(void*));
+	pointer_array->delete_func  = delete_func;
+}
+
+/*
+ ReleasePointerArray関数
+ 可変長ポインタ型配列を開放する
+ 引数
+ pointer_array	: 可変長ポインタ型配列
+*/
+void ReleasePointerArray(POINTER_ARRAY* pointer_array)
+{
+	if(pointer_array->delete_func != NULL)
+	{
+		unsigned int i;
+		for(i=0; i<(unsigned int)pointer_array->num_data; i++)
+		{
+			pointer_array->delete_func(pointer_array->buffer[i]);
+		}
+	}
+	MEM_FREE_FUNC(pointer_array->buffer);
+}
+
+/*
+ PointerArrayAppend関数
+ 可変長ポインタ型配列にデータを追加する
+ 引数
+ pointer_array	: 可変長ポインタ型配列
+ data			: 追加するデータ
+*/
+void PointerArrayAppend(POINTER_ARRAY* pointer_array, void* data)
+{
+	pointer_array->buffer[pointer_array->num_data] = data;
+	pointer_array->num_data++;
+
+	if(pointer_array->num_data == pointer_array->buffer_size)
+	{
+		size_t before_size = pointer_array->buffer_size;
+		pointer_array->buffer_size += pointer_array->block_size;
+		pointer_array->buffer = (void***)MEM_REALLOC_FUNC(
+			pointer_array->buffer, sizeof(*pointer_array->buffer)*pointer_array->buffer_size);
+		(void)memset(&pointer_array->buffer[before_size], 0,
+			sizeof(*pointer_array->buffer)*pointer_array->block_size);
+	}
 }
 
 /*
