@@ -75,6 +75,14 @@ extern "C" {
 #endif
 
 /*
+ DummyFunctionNoReturn関数
+ 何もしないコールバック関数(返り値無し)
+ 引数
+ dummy	: ダミーの引数
+*/
+extern void DummyFunctionNoReturn(void* dummy);
+
+/*
  StringCompareIgnoreCase関数
  大文字/小文字を無視して文字列を比較
  引数

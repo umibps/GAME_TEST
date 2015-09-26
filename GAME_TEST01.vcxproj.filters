@@ -85,6 +85,12 @@
     <Filter Include="ソース ファイル\libFLAC\share">
       <UniqueIdentifier>{9aca7397-4302-4418-a953-e707537b7576}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\script">
+      <UniqueIdentifier>{26c277c1-bdf2-4609-9c78-63cf769edba5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\script">
+      <UniqueIdentifier>{c8ef2f6d-529b-41f5-95bd-9b7c2821ccf8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="freeglut\fg_callbacks.c">
@@ -462,9 +468,6 @@
     <ClCompile Include="utils.c">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="vertex.c">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="initialize.c">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -472,9 +475,6 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="game_data.c">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="main.c">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="display_common.c">
@@ -783,6 +783,33 @@
     <ClCompile Include="libFLAC\share\win_utf8_io\win_utf8_io.c">
       <Filter>ソース ファイル\libFLAC\share</Filter>
     </ClCompile>
+    <ClCompile Include="file_archive.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="random.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="script\token.c">
+      <Filter>ソース ファイル\script</Filter>
+    </ClCompile>
+    <ClCompile Include="memory_pool.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="vertex.c">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="script\lexical_analyser.c">
+      <Filter>ソース ファイル\script</Filter>
+    </ClCompile>
+    <ClCompile Include="script\basic_parser.c">
+      <Filter>ソース ファイル\script</Filter>
+    </ClCompile>
+    <ClCompile Include="script\abstract_syntax_tree.c">
+      <Filter>ソース ファイル\script</Filter>
+    </ClCompile>
+    <ClCompile Include="main.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="freeglut\mswin\fg_internal_mswin.h">
@@ -1036,6 +1063,27 @@
     </ClInclude>
     <ClInclude Include="include\libFLAC\FLAC\stream_encoder.h">
       <Filter>ヘッダー ファイル\libFLAC</Filter>
+    </ClInclude>
+    <ClInclude Include="file_archive.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="random.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="script\token.h">
+      <Filter>ヘッダー ファイル\script</Filter>
+    </ClInclude>
+    <ClInclude Include="memory_pool.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="script\lexical_analyser.h">
+      <Filter>ヘッダー ファイル\script</Filter>
+    </ClInclude>
+    <ClInclude Include="script\basic_parser.h">
+      <Filter>ヘッダー ファイル\script</Filter>
+    </ClInclude>
+    <ClInclude Include="script\abstract_syntax_tree.h">
+      <Filter>ヘッダー ファイル\script</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

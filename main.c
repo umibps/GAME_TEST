@@ -2,13 +2,13 @@
 #include "game_data.h"
 #include "initialize.h"
 #include "random.h"
-#include "script/lexical_analyzer.h"
+#include "script/lexical_analyser.h"
 
 int main(int argc, char** argv)
 {
 	FILE_ARCHIVE archive;
 	FILE *fp;
-	LEXICAL_ANALYZER analyzer;
+	LEXICAL_ANALYSER analyzer;
 	TOKEN **token;
 	int i;
 
