@@ -25,7 +25,7 @@ typedef enum _eTOKEN_TYPE
 	TOKEN_TYPE_EQUAL,			// 比較(等しい)
 	TOKEN_TYPE_NOT_EQUAL,		// 比較(等しくない)
 	TOKEN_TYPE_LESS,			// 比較(未満)
-	TOKEN_TYPE_LESS_EQUSL,		// 比較(以下)
+	TOKEN_TYPE_LESS_EQUAL,		// 比較(以下)
 	TOKEN_TYPE_GREATER,			// 比較(大きい)
 	TOKEN_TYPE_GREATER_EQUAL,	// 比較(以上)
 	TOKEN_TYPE_INCREMENT,		// インクリメント
@@ -41,7 +41,8 @@ typedef enum _eTOKEN_TYPE
 	TOKEN_TYPE_RIGHT_BRACE,		// 中括弧終わり
 	TOKEN_TYPE_LEFT_BRACKET,	// 大括弧始め
 	TOKEN_TYPE_RIGHT_BRACKET,	// 大括弧終わり
-	TOKEN_TYPE_IDENT,			// 変数、関数の識別子
+	TOKEN_TYPE_IDENT,			// 変数の識別子
+	TOKEN_TYPE_FUNCTION,		// 関数の識別子
 	TOKEN_TYPE_END_OF_CODE,		// コードの終端
 	NUM_TOKEN_TYPE
 } eTOKEN_TYPE;
@@ -58,5 +59,22 @@ typedef struct _TOKEN
 	uint16 line;		// 行数
 	char *name;			// トークンの名前
 } TOKEN;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/*
+ InitializeToken関数
+ スクリプトの字句解析によって得られるトークンデータを初期化する
+ 引数
+ token	: トークンデータ
+ line	: トークンの存在する行数
+*/
+EXTERN void InitializeToken(TOKEN* token, int line);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif	// #ifndef _INCLUDED_TOKEN_H_

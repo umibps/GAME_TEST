@@ -11,7 +11,7 @@ extern "C" {
 #endif
 
 /*
- InitializeLexicalAnalyzer関数
+ InitializeLexicalAnalyser関数
  ソースコードをトークンに分解するためのデータを初期化
  引数
  analyser			: ソースコードをトークンに分解するためのデータ
@@ -19,14 +19,14 @@ extern "C" {
  error_message_func	: エラーメッセージ表示用関数ポインタ
  message_func_data	: エラーメッセージ表示用関数で使うデータ
 */
-void InitializeLexicalAnalyzer(
+void InitializeLexicalAnalyser(
 	LEXICAL_ANALYSER* analyser,
 	const char* file_path,
 	void (*error_message_func)(void*, const char*, ... ),
 	void* message_func_data
 )
 {
-	(void)memset(analyser, 0, sizeof(analyser));
+	(void)memset(analyser, 0, sizeof(*analyser));
 
 	InitializeMemoryPool(&analyser->memory_pool, MEMORY_POOL_SIZE);
 	InitializePointerArray(&analyser->file_names, FILE_NAMES_BUFFER_SIZE,
@@ -65,7 +65,8 @@ static int GetNextTokenString(
 	buffer[0] = '\0';
 
 	// スペース、タブ、改行を読み飛ばす
-	while(**code == ' ' || **code == '\t' || **code == '\n' || **code == '\r')
+	while(**code == ' ' || **code == '\t' || **code == '\n' || **code == '\r'
+		|| ((**code == '/') && ((*code)[1] == '/' || (*code)[1] == '*')))
 	{
 		if(**code == '\n')
 		{	// 改行なら行数を更新
@@ -81,7 +82,7 @@ static int GetNextTokenString(
 			} while(**code != '\0' && **code != '\n');
 			if(**code == '\n')
 			{
-				*code++;
+				(*code)++;
 				(*line_count)++;
 			}
 			else
@@ -91,6 +92,7 @@ static int GetNextTokenString(
 		}
 		else if((*code)[0] == '/' && (*code)[1] == '*')
 		{
+			(*code) += 2;
 			comment_level = 1;
 			do
 			{
@@ -138,6 +140,7 @@ static int GetNextTokenString(
 			(*code)++;
 			buffer++;
 		} while(*code < next);
+		*buffer = '\0';
 
 		while(isalnum(**code) != FALSE || **code == '_')
 		{
@@ -465,7 +468,7 @@ static int GetNextTokenString(
 	{
 		if((*code)[1] == '=')
 		{
-			*token_type = TOKEN_TYPE_LESS_EQUSL;
+			*token_type = TOKEN_TYPE_LESS_EQUAL;
 			*buffer = **code;
 			buffer++;
 			(*code)++;
@@ -560,7 +563,7 @@ static int GetNextTokenString(
  line_count	: 現在の行番号
  str		: トークンの文字列
 */
-static void AppendToekn(
+static void AppendToken(
 	LEXICAL_ANALYSER* analyser,
 	eTOKEN_TYPE token_type,
 	int file_id,
@@ -602,7 +605,7 @@ static void AppendToekn(
 }
 
 /*
- LexicalAnayze関数
+ LexicalAnayse関数
  ソースコードをトークンに分解する
  引数
  analyser	: ソースコードをトークンに分解するためのデータ
@@ -615,7 +618,7 @@ static void AppendToekn(
  返り値
 	正常終了:TRUE	異常終了:FALSE
 */
-int LexicalAnalyze(
+int LexicalAnalyse(
 	LEXICAL_ANALYSER* analyser,
 	void* (*open_func)(const char*, const char*, void*),
 	size_t (*read_func)(void*, size_t, size_t, void*),
@@ -657,14 +660,21 @@ int LexicalAnalyze(
 	{
 		if(GetNextTokenString(analyser, &p, str, &line_count, &token_type, analyser->file_path) == FALSE)
 		{
-			MEM_FREE_FUNC(code);
-			(void)close_func(src);
-			return FALSE;
+			if(p != code + length)
+			{
+				MEM_FREE_FUNC(code);
+				(void)close_func(src);
+				return FALSE;
+			}
+			else
+			{
+				break;
+			}
 		}
-		AppendToekn(analyser, token_type,
+		AppendToken(analyser, token_type,
 			0, line_count, str);
 	}
-	AppendToekn(analyser, TOKEN_TYPE_END_OF_CODE, 0, line_count, NULL);
+	AppendToken(analyser, TOKEN_TYPE_END_OF_CODE, 0, line_count, NULL);
 
 	MEM_FREE_FUNC(code);
 	(void)close_func(src);
@@ -673,17 +683,59 @@ int LexicalAnalyze(
 }
 
 /*
- ReleaseLexicalAnalyzer関数
+ ReleaseLexicalAnalyser関数
  ソースコードをトークンに分解するためのデータを開放する
  引数
  analyser	: ソースコードをトークンに分解するためのデータ
 */
-void ReleaseLexicalAnalyzer(LEXICAL_ANALYSER* analyser)
+void ReleaseLexicalAnalyser(LEXICAL_ANALYSER* analyser)
 {
 	MEM_FREE_FUNC(analyser->file_path);
 	ReleaseMemoryPool(&analyser->memory_pool);
 	ReleasePointerArray(&analyser->file_names);
 	ReleasePointerArray(&analyser->tokens);
+}
+
+/*
+ LexicalAnalyserReadToken関数
+ 構文解析時にトークンを1つ取得
+ 引数
+ analyser	: ソースコードをトークンに分解するためのデータ
+ 返り値
+	トークン
+*/
+TOKEN* LexicalAnalyserReadToken(LEXICAL_ANALYSER* analyser)
+{
+	TOKEN *ret = NULL;
+	if(analyser->reference < (int)analyser->tokens.num_data)
+	{
+		ret = ((TOKEN**)analyser->tokens.buffer)[analyser->reference];
+		analyser->reference++;
+	}
+
+	return ret;
+}
+
+/*
+ LexicalAnalyserPeekToken関数
+ 構文解析時に現在の位置から
+ 指定個数先のトークンを取得する
+ 引数
+ analyser	: ソースコードをトークンに分解するためのデータ
+ id			: 飛ばす個数
+ 返り値
+	トークン
+*/
+TOKEN* LexicalAnalyserPeekToken(LEXICAL_ANALYSER* analyser, int id)
+{
+	TOKEN *ret = NULL;
+	int index = analyser->reference + id;
+	if(index < (int)analyser->tokens.num_data)
+	{
+		ret = ((TOKEN**)analyser->tokens.buffer)[index];
+	}
+
+	return ret;
 }
 
 #ifdef __cplusplus

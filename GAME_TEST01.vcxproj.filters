@@ -801,14 +801,20 @@
     <ClCompile Include="script\lexical_analyser.c">
       <Filter>ソース ファイル\script</Filter>
     </ClCompile>
-    <ClCompile Include="script\basic_parser.c">
-      <Filter>ソース ファイル\script</Filter>
-    </ClCompile>
-    <ClCompile Include="script\abstract_syntax_tree.c">
-      <Filter>ソース ファイル\script</Filter>
-    </ClCompile>
     <ClCompile Include="main.c">
       <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="script\parser.c">
+      <Filter>ソース ファイル\script</Filter>
+    </ClCompile>
+    <ClCompile Include="script\compile.c">
+      <Filter>ソース ファイル\script</Filter>
+    </ClCompile>
+    <ClCompile Include="script\rule.c">
+      <Filter>ソース ファイル\script</Filter>
+    </ClCompile>
+    <ClCompile Include="script\script.c">
+      <Filter>ソース ファイル\script</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1079,10 +1085,22 @@
     <ClInclude Include="script\lexical_analyser.h">
       <Filter>ヘッダー ファイル\script</Filter>
     </ClInclude>
-    <ClInclude Include="script\basic_parser.h">
+    <ClInclude Include="script\parser.h">
+      <Filter>ヘッダー ファイル\script</Filter>
+    </ClInclude>
+    <ClInclude Include="script\compile.h">
+      <Filter>ヘッダー ファイル\script</Filter>
+    </ClInclude>
+    <ClInclude Include="script\operand.h">
+      <Filter>ヘッダー ファイル\script</Filter>
+    </ClInclude>
+    <ClInclude Include="script\rule.h">
       <Filter>ヘッダー ファイル\script</Filter>
     </ClInclude>
     <ClInclude Include="script\abstract_syntax_tree.h">
+      <Filter>ヘッダー ファイル\script</Filter>
+    </ClInclude>
+    <ClInclude Include="script\script.h">
       <Filter>ヘッダー ファイル\script</Filter>
     </ClInclude>
   </ItemGroup>

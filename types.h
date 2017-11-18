@@ -62,6 +62,13 @@ typedef float FLOAT_T;
 
 #define DIV_PIXEL ((FLOAT_T)0.00392157f)
 
+#if defined(_DEBUG) || defined(DEBUG)
+# include <assert.h>
+# define ASSERT(X) assert((X))
+#else
+# define ASSERT(X)
+#endif
+
 typedef struct _GAME_DATA GAME_DATA;
 
 #endif	// #ifndef _INCLUDE_TYPES_H_

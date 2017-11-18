@@ -2,6 +2,7 @@
 #define _INCLUDED_UTILS_H_
 
 #include <stdio.h>
+#include <stdarg.h>
 #include "types.h"
 
 /*
@@ -73,6 +74,14 @@ typedef struct _STRING_HASH_TABLE
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/*
+ ErrorMessage関数
+ エラーメッセージを表示する
+ 引数
+ format	: 表示するメッセージのフォーマット
+*/
+void ErrorMessage(const char* format, ... );
 
 /*
  DummyFunctionNoReturn関数
@@ -318,6 +327,35 @@ EXTERN void StringHashTableRemove(
 	STRING_HASH_TABLE* hash_table,
 	const char* key
 );
+
+/*
+ FLAG_ONマクロ
+ フラグ配列の対象フラグをONにする
+ 引数
+ flags	: フラグ配列
+ id		: ONにするフラグ
+*/
+#define FLAG_ON(flags, id) ((flags)[((id) / (sizeof(*flags) * 8))] |= (1 << ((id) % (sizeof(flags) * 8))))
+
+/*
+ FLAG_OFFマクロ
+ フラグ配列の対象フラグをOFFにする
+ 引数
+ flags	: フラグ配列
+ id		: OFFにするフラグ
+*/
+#define FLAG_OFF(flags, id) ((flags)[((id) / (sizeof(*flags) * 8))] &= ~(1 << ((id) % (sizeof(*flags) * 8))))
+
+/*
+ FLAG_CHECKマクロ
+ フラグ配列の対象フラグのON/OFF判定
+ 引数
+ flags	: フラグ配列
+ id		: ON/OFF判定するフラグ
+ 返り値
+ ON:0以外	OFF:0
+*/
+#define FLAG_CHECK(flags, id) ((flags)[((id) / (sizeof(*flags) * 8))] & (1 << ((id) % (sizeof(*flags) * 8))))
 
 #ifdef __cplusplus
 }

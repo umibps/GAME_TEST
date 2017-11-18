@@ -227,6 +227,7 @@ void ReleasePointerArray(POINTER_ARRAY* pointer_array)
 		}
 	}
 	MEM_FREE_FUNC(pointer_array->buffer);
+	pointer_array->buffer = NULL;
 }
 
 /*

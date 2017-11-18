@@ -16,6 +16,7 @@ typedef struct _LEXICAL_ANALYSER
 	MEMORY_POOL memory_pool;		// トークン保持用のメモリプール
 	POINTER_ARRAY file_names;		// ソースコードファイル
 	POINTER_ARRAY tokens;			// トークン
+	int reference;					// 構文解析時の参照トークンID
 	// エラーメッセージ表示用関数
 	void (*error_message_func)(void* data, const char* message, ... );
 	void *error_message_func_data;	// エラー表示用の関数で使うデータ
@@ -26,7 +27,7 @@ extern "C" {
 #endif
 
 /*
- InitializeLexicalAnalyzer関数
+ InitializeLexicalAnalyser関数
  ソースコードをトークンに分解するためのデータを初期化
  引数
  analyser			: ソースコードをトークンに分解するためのデータ
@@ -34,7 +35,7 @@ extern "C" {
  error_message_func	: エラーメッセージ表示用関数ポインタ
  message_func_data	: エラーメッセージ表示用関数で使うデータ
 */
-EXTERN void InitializeLexicalAnalyzer(
+EXTERN void InitializeLexicalAnalyser(
 	LEXICAL_ANALYSER* analyser,
 	const char* file_path,
 	void (*error_message_func)(void*, const char*, ... ),
@@ -42,15 +43,15 @@ EXTERN void InitializeLexicalAnalyzer(
 );
 
 /*
- ReleaseLexicalAnalyzer関数
+ ReleaseLexicalAnalyser関数
  ソースコードをトークンに分解するためのデータを開放する
  引数
  analyser	: ソースコードをトークンに分解するためのデータ
 */
-EXTERN void ReleaseLexicalAnalyzer(LEXICAL_ANALYSER* analyser);
+EXTERN void ReleaseLexicalAnalyser(LEXICAL_ANALYSER* analyser);
 
 /*
- LexicalAnayze関数
+ LexicalAnayse関数
  ソースコードをトークンに分解する
  引数
  analyser	: ソースコードをトークンに分解するためのデータ
@@ -63,7 +64,7 @@ EXTERN void ReleaseLexicalAnalyzer(LEXICAL_ANALYSER* analyser);
  返り値
 	正常終了:TRUE	異常終了:FALSE
 */
-EXTERN int LexicalAnalyze(
+EXTERN int LexicalAnalyse(
 	LEXICAL_ANALYSER* analyser,
 	void* (*open_func)(const char*, const char*, void*),
 	size_t (*read_func)(void*, size_t, size_t, void*),
@@ -72,6 +73,28 @@ EXTERN int LexicalAnalyze(
 	int (*close_func)(void*),
 	void* open_data
 );
+
+/*
+ LexicalAnalyserReadToken関数
+ 構文解析時にトークンを1つ取得
+ 引数
+ analyser	: ソースコードをトークンに分解するためのデータ
+ 返り値
+	トークン
+*/
+EXTERN TOKEN* LexicalAnalyserReadToken(LEXICAL_ANALYSER* analyser);
+
+/*
+ LexicalAnalyserPeekToken関数
+ 構文解析時に現在の位置から
+ 指定個数先のトークンを取得する
+ 引数
+ analyser	: ソースコードをトークンに分解するためのデータ
+ id			: 飛ばす個数
+ 返り値
+	トークン
+*/
+EXTERN TOKEN* LexicalAnalyserPeekToken(LEXICAL_ANALYSER* analyser, int id);
 
 #ifdef __cplusplus
 }

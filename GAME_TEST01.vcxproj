@@ -357,9 +357,11 @@
     <ClCompile Include="pc\display.c" />
     <ClCompile Include="pc\input.c" />
     <ClCompile Include="random.c" />
-    <ClCompile Include="script\abstract_syntax_tree.c" />
-    <ClCompile Include="script\basic_parser.c" />
     <ClCompile Include="script\lexical_analyser.c" />
+    <ClCompile Include="script\parser.c" />
+    <ClCompile Include="script\compile.c" />
+    <ClCompile Include="script\rule.c" />
+    <ClCompile Include="script\script.c" />
     <ClCompile Include="script\token.c" />
     <ClCompile Include="shader_program.c" />
     <ClCompile Include="sound.c" />
@@ -459,8 +461,12 @@
     <ClInclude Include="memory_pool.h" />
     <ClInclude Include="random.h" />
     <ClInclude Include="script\abstract_syntax_tree.h" />
-    <ClInclude Include="script\basic_parser.h" />
+    <ClInclude Include="script\compile.h" />
     <ClInclude Include="script\lexical_analyser.h" />
+    <ClInclude Include="script\operand.h" />
+    <ClInclude Include="script\parser.h" />
+    <ClInclude Include="script\rule.h" />
+    <ClInclude Include="script\script.h" />
     <ClInclude Include="script\token.h" />
     <ClInclude Include="shader_program.h" />
     <ClInclude Include="sound.h" />
