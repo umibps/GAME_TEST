@@ -6,6 +6,18 @@
 #include "lexical_analyser.h"
 
 /*
+ eSCRIPT_BASIC_RESERVED_TYPE列挙体
+ デフォルトのスクリプト実行処理での予約語識別ID
+*/
+typedef enum _eSCRIPT_BASIC_RESERVED_TYPE
+{
+	SCRIPT_BASIC_RESERVED_IF = NUM_DEFAULT_TOKEN_TYPE,
+	SCRIPT_BASIC_RESERVED_ELSE,
+	SCRIPT_BASIC_RESERVED_WHILE,
+	SCRIPT_BASIC_RESERVED_BREAK
+} eSCRIPT_BASIC_RESERVED_TYPE;
+
+/*
  SCRIPT_BASIC_EXECUTOR構造体
  デフォルトのスクリプト実行用データ
 */
@@ -85,6 +97,16 @@ EXTERN int ScriptBasicExecutorExecute(
  executor	: デフォルトのスクリプト実行用データ
 */
 EXTERN void ReleaseScriptBasicExecutor(SCRIPT_BASIC_EXECUTOR* executor);
+
+/*
+ ScriptBasicGetDefaultReservedStrings関数
+ デフォルトの予約語の文字列配列を取得する
+ 引数
+ num_strings	: 予約語の数
+ 返り値
+	デフォルトの予約語の文字列配列
+*/
+EXTERN const char** ScriptBasicGetDefaultReservedStrings(int* num_strings);
 
 #ifdef __cplusplus
 }

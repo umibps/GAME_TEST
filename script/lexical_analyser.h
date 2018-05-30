@@ -17,6 +17,9 @@ typedef struct _LEXICAL_ANALYSER
 	POINTER_ARRAY file_names;		// ソースコードファイル
 	POINTER_ARRAY tokens;			// トークン
 	int reference;					// 構文解析時の参照トークンID
+	char **reserved;				// 予約語の文字列データ
+	uint16 *reserved_type;			// 予約語の識別IDデータ
+	int num_reserved;				// 予約語の数
 	// エラーメッセージ表示用関数
 	void (*error_message_func)(void* data, const char* message, ... );
 	void *error_message_func_data;	// エラー表示用の関数で使うデータ
@@ -95,6 +98,22 @@ EXTERN TOKEN* LexicalAnalyserReadToken(LEXICAL_ANALYSER* analyser);
 	トークン
 */
 EXTERN TOKEN* LexicalAnalyserPeekToken(LEXICAL_ANALYSER* analyser, int id);
+
+/*
+ LexicalAnalyserSetReserved関数
+ 予約語を設定する
+ 引数
+ analyser		: ソースコードをトークンに分解するためのデータ
+ reserved		: 予約語の文字列データ
+ reserved_ids	: 予約語の識別IDデータ
+ num_reserved	: 設定する予約語の数
+*/
+EXTERN void LexicalAnalyserSetReserved(
+	LEXICAL_ANALYSER* analyser,
+	const char** reserved,
+	uint16* reserved_ids,
+	int num_reserved
+);
 
 #ifdef __cplusplus
 }

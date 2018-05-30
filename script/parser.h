@@ -50,6 +50,10 @@ typedef struct _SCRIPT_PARSER_ELEMENT
 	int (*parse_minus)(struct _SCRIPT_PARSER_ELEMENT* parser, int token_id, ABSTRACT_SYNTAX_TREE* parent);
 	// ( )を構文解析する
 	int (*parse_paren)(struct _SCRIPT_PARSER_ELEMENT* parser, int token_id, ABSTRACT_SYNTAX_TREE* parent);
+	// { }を構文解析する
+	int (*parse_brace)(struct _SCRIPT_PARSER_ELEMENT* parser, int token_id, ABSTRACT_SYNTAX_TREE* parent);
+	// 制御構文及び組み込み関数を構文解析する
+	int (**parse_reserved)(struct _SCRIPT_PARSER_ELEMENT* parser, int token_id, ABSTRACT_SYNTAX_TREE* parent);
 	// メモリ開放用の関数
 	void (*release)(struct _SCRIPT_PARSER_ELEMENT* parser);
 } SCRIPT_PARSER_ELEMENT;
@@ -64,12 +68,24 @@ typedef struct _SCRIPT_BASIC_PARSER
 	// 抽象構文木にトークンを追加したら立つフラグ
 	unsigned int *token_check_flag;
 	// 同じ計算優先度の演算が続いた時に親変更用
-	ABSTRACT_SYNTAX_TREE *new_parent;
+	POINTER_ARRAY new_parent;
 } SCRIPT_BASIC_PARSER;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/*
+ ScriptParserElementSetReservedParseRule関数
+ 構文解析器に予約語及び組み込み関数の構文解析用のルールを追加する
+ 引数
+ parser				: 構文解析器
+ parse_functions	: 構文解析処理を行う関数ポインタ配列
+*/
+EXTERN void ScriptParserElementSetReservedParseRule(
+	SCRIPT_PARSER_ELEMENT* parser,
+	int (**parse_functions)(struct _SCRIPT_PARSER_ELEMENT* parser, int token_id, ABSTRACT_SYNTAX_TREE* parent)
+);
 
 /*
  InitializeScriptBasicParser関数
@@ -92,6 +108,18 @@ EXTERN void InitializeScriptBasicParser(
 	int num_user_functions,
 	void* user_data
 );
+
+/*
+ ScriptBasicParserParseIf関数
+ デフォルトの構文解析器でif制御構文を解析
+ 引数
+ parser		: 構文解析器
+ token_id	: 解析中のトークンID
+ parent		: 抽象構文木の親ノード
+ 返り値
+	正常終了:TRUE	異常終了:FALSE
+*/
+int ScriptBasicParserParseIf(SCRIPT_BASIC_PARSER* parser, int token_id, ABSTRACT_SYNTAX_TREE* parent);
 
 #ifdef __cplusplus
 }

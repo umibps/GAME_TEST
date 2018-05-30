@@ -1,3 +1,10 @@
+// Visual Studio 2005以降では古いとされる関数を使用するので
+// 警告が出ないようにする
+#if defined _MSC_VER && _MSC_VER >= 1400
+# define _CRT_SECURE_NO_DEPRECATE
+# define _CRT_NONSTDC_NO_DEPRECATE
+#endif
+
 #include <string.h>
 #include <stdarg.h>
 #include <ctype.h>
@@ -131,8 +138,11 @@ static int GetNextTokenString(
 	if(isalpha(**code) != FALSE || **code == '_')
 	{
 		char *next;
+		char *token_string;
+		int i;
 		*token_type = TOKEN_TYPE_IDENT;
 
+		token_string = buffer;
 		next = (char*)GetNextUtf8Character(*code);
 		do
 		{
@@ -152,6 +162,15 @@ static int GetNextTokenString(
 				(*code)++;
 			} while(*code < next);
 			*buffer = '\0';
+		}
+
+		for(i=0; i<analyser->num_reserved; i++)
+		{
+			if(strcmp(token_string, analyser->reserved[i]) == 0)
+			{
+				*token_type = NUM_DEFAULT_TOKEN_TYPE + i;
+				break;
+			}
 		}
 	}
 	else if(isdigit(**code) != FALSE)
@@ -736,6 +755,47 @@ TOKEN* LexicalAnalyserPeekToken(LEXICAL_ANALYSER* analyser, int id)
 	}
 
 	return ret;
+}
+
+/*
+ LexicalAnalyserSetReserved関数
+ 予約語を設定する
+ 引数
+ analyser		: ソースコードをトークンに分解するためのデータ
+ reserved		: 予約語の文字列データ
+ reserved_ids	: 予約語の識別IDデータ
+ num_reserved	: 設定する予約語の数
+*/
+void LexicalAnalyserSetReserved(
+	LEXICAL_ANALYSER* analyser,
+	const char** reserved,
+	uint16* reserved_ids,
+	int num_reserved
+)
+{
+	uint8 *allocated_data;
+	size_t allocate_size = 0;
+	char *str;
+	int i;
+
+	allocate_size = sizeof(char*) * num_reserved;
+	for(i=0; i<num_reserved; i++)
+	{
+		allocate_size += strlen(reserved[i]) + 1;
+	}
+	allocate_size += allocate_size % 4;
+	analyser->reserved = (char**)(allocated_data = (uint8*)MemoryPoolAllocate(&analyser->memory_pool, allocate_size + sizeof(uint16) * num_reserved));
+	str = (char*)&allocated_data[sizeof(char*) * num_reserved];
+	analyser->reserved_type = (uint16*)&allocated_data[allocate_size + (allocate_size % 4)];
+
+	for(i=0; i<num_reserved; i++)
+	{
+		analyser->reserved[i] = str;
+		str += strlen(reserved[i]) + 1;
+		(void)strcpy(analyser->reserved[i], reserved[i]);
+		analyser->reserved_type[i] = reserved_ids[i];
+	}
+	analyser->num_reserved = num_reserved;
 }
 
 #ifdef __cplusplus

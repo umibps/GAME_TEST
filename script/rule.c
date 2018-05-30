@@ -1,9 +1,28 @@
 #include <string.h>
 #include "rule.h"
+#include "lexical_analyser.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/*
+ ScriptRuleElementSetReservedRule関数
+ 構文解析に予約語のルールを設定する
+ 引数
+ element		: スクリプトの構文解析ルールの基本データ
+ rules			: 予約語のルール処理関数
+ function_data	: ルール処理実行時に使用するデータ
+*/
+void ScriptRuleElementSetReservedRule(
+	SCRIPT_RULE_ELEMENT* element,
+	int (**rules)(struct _SCRIPT_RULE_ELEMENT* rule, struct _LEXICAL_ANALYSER* analyser, void* function_data),
+	void* function_data
+)
+{
+	element->reserved_rule = rules;
+	element->function_data = function_data;
+}
 
 /*
  ScriptBasicAssignRule関数
@@ -628,6 +647,33 @@ void InitializeScriptBasicRule(
 		(int (*)(SCRIPT_RULE_ELEMENT*, TOKEN*, TOKEN*))ScriptBasicGreaterRule;
 	rule->element.greater_equal_rule =
 		(int (*)(SCRIPT_RULE_ELEMENT*, TOKEN*, TOKEN*))ScriptBasicGreaterEqualRule;
+}
+
+/*
+ ScriptBasicIfRule関数
+ if制御構文ルール
+ 引数
+ rule		: 構文解析のルールを管理するデータ
+ analyser		: 字句解析器
+ function_data	: ダミー
+ 返り値
+	ルールを満足:TRUE	ルールを満たさない:FALSE
+*/
+int ScriptBasicIfRule(struct _SCRIPT_RULE_ELEMENT* rule, struct _LEXICAL_ANALYSER* analyser, void* function_data)
+{
+	TOKEN *next_token = LexicalAnalyserReadToken(analyser);
+	if(next_token->token_type != TOKEN_TYPE_LEFT_PAREN)
+	{
+		const char *file_name = "";
+		int line = 0;
+
+		file_name = rule->file_names[next_token->file_id];
+		line = next_token->length;
+		rule->error_message(rule->error_message_data,
+			file_name, line, "\"(\" is missed after \"if\"...");
+		return FALSE;
+	}
+	return TRUE;
 }
 
 #ifdef __cplusplus

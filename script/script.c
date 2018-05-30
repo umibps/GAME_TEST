@@ -74,6 +74,18 @@ int ScriptBasicExecutorExecute(
 	void* open_data
 )
 {
+	const char **reserved_string;
+	uint16 reserved_ids[] = {SCRIPT_BASIC_RESERVED_IF};
+	int (*rules[])(struct _SCRIPT_RULE_ELEMENT* rule, struct _LEXICAL_ANALYSER* analyser, void* function_data)
+		= {ScriptBasicIfRule};
+	int (*parse_functions[])(struct _SCRIPT_PARSER_ELEMENT* parser, int token_id, ABSTRACT_SYNTAX_TREE* parent)
+		= {ScriptBasicParserParseIf};
+	int num_strings;
+
+	reserved_string = ScriptBasicGetDefaultReservedStrings(&num_strings);
+	LexicalAnalyserSetReserved(&executor->analyser, reserved_string,
+		reserved_ids, 1);
+
 	if(LexicalAnalyse(&executor->analyser, open_func, read_func,
 		seek_func, tell_func, close_func, open_data) == FALSE)
 	{
@@ -86,6 +98,10 @@ int ScriptBasicExecutorExecute(
 		(TOKEN**)executor->analyser.tokens.buffer, (int)executor->analyser.tokens.num_data,
 		executor->user_function_names, executor->num_user_functions, executor->user_data
 	);
+	ScriptRuleElementSetReservedRule(&executor->rule.element,
+		rules, NULL);
+	ScriptParserElementSetReservedParseRule(&executor->parser.element,
+		parse_functions);
 
 	if(executor->parser.element.parse(&executor->parser.element) == FALSE)
 	{
@@ -93,6 +109,25 @@ int ScriptBasicExecutorExecute(
 	}
 
 	return TRUE;
+}
+
+/*
+ ScriptBasicGetDefaultReservedStrings関数
+ デフォルトの予約語の文字列配列を取得する
+ 引数
+ num_strings	: 予約語の数
+ 返り値
+	デフォルトの予約語の文字列配列
+*/
+const char** ScriptBasicGetDefaultReservedStrings(int* num_strings)
+{
+	static const char *reserved[] ={"if", "else", "while", "break"};
+	if(num_strings != NULL)
+	{
+		*num_strings = sizeof(reserved) / sizeof(char*);
+	}
+
+	return reserved;
 }
 
 #ifdef __cplusplus
