@@ -39,6 +39,9 @@ typedef struct _SCRIPT_RULE_ELEMENT
 	int (*greater_rule)(struct _SCRIPT_RULE_ELEMENT* rule, TOKEN* left, TOKEN* right);
 	// 値比較(以下)を処理するルール
 	int (*greater_equal_rule)(struct _SCRIPT_RULE_ELEMENT* rule, TOKEN* left, TOKEN* right);
+	// 制御構文を処理するルール関数配列とその数
+	int (**reserved_rule)(struct _SCRIPT_RULE_ELEMENT* rule, struct _LEXICAL_ANALYSER* analyser, void* function_data);
+	int num_reserved_rule;
 	// エラー発生時に使用する関数ポインタ
 	void (*error_message)(void* error_message_data, const char* file_name,
 		int line, const char* message, ...);
@@ -46,6 +49,8 @@ typedef struct _SCRIPT_RULE_ELEMENT
 	void *error_message_data;
 	// スクリプトファイルのファイル名(複数ファイル)
 	const char **file_names;
+	// 組み込み関数処理用のデータ
+	void *function_data;
 	// メモリ管理用データ
 	MEMORY_POOL *memory_pool;
 } SCRIPT_RULE_ELEMENT;
@@ -58,6 +63,22 @@ typedef struct _SCRIPT_BASIC_RULE
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/*
+ ScriptRuleElementSetReservedRule関数
+ 構文解析に予約語のルールを設定する
+ 引数
+ element		: スクリプトの構文解析ルールの基本データ
+ rules			: 予約語のルール処理関数
+ num_rules		: ルール処理関数の数
+ function_data	: ルール処理実行時に使用するデータ
+*/
+EXTERN void ScriptRuleElementSetReservedRule(
+	SCRIPT_RULE_ELEMENT* element,
+	int (**rules)(struct _SCRIPT_RULE_ELEMENT* rule, struct _LEXICAL_ANALYSER* analyser, void* function_data),
+	int num_rules,
+	void* function_data
+);
 
 /*
  InitializeScriptBasicRule関数
@@ -76,6 +97,32 @@ EXTERN void InitializeScriptBasicRule(
 	const char** file_names,
 	MEMORY_POOL* memory_pool
 );
+
+/*
+ ScriptBasicDummyRule関数
+ ダミールール
+ 引数
+ rule			: 構文解析のルールを管理するデータ
+ analyser		: 字句解析器
+ function_data	: ダミー
+ 返り値
+	常にTRUE
+*/
+int ScriptBasicDummyRule(struct _SCRIPT_RULE_ELEMENT* rule,struct _LEXICAL_ANALYSER* analyser,void* function_data);
+
+/*
+ ScriptBasicIfRule関数
+ if制御構文ルール
+ 引数
+ rule			: 構文解析のルールを管理するデータ
+ analyser		: 字句解析器
+ function_data	: ダミー
+ 返り値
+	ルールを満足:TRUE	ルールを満たさない:FALSE
+*/
+int ScriptBasicIfRule(struct _SCRIPT_RULE_ELEMENT* rule, struct _LEXICAL_ANALYSER* analyser, void* function_data);
+
+#define ScriptBasicElseRule ScriptBasicDummyRule
 
 #ifdef __cplusplus
 }

@@ -44,7 +44,7 @@ typedef enum _eTOKEN_TYPE
 	TOKEN_TYPE_IDENT,			// 変数の識別子
 	TOKEN_TYPE_FUNCTION,		// 関数の識別子
 	TOKEN_TYPE_END_OF_CODE,		// コードの終端
-	NUM_TOKEN_TYPE
+	NUM_DEFAULT_TOKEN_TYPE
 } eTOKEN_TYPE;
 
 /*

@@ -1,7 +1,15 @@
+// Visual Studio 2005以降では古いとされる関数を使用するので
+// 警告が出ないようにする
+#if defined _MSC_VER && _MSC_VER >= 1400
+# define _CRT_SECURE_NO_DEPRECATE
+# define _CRT_NONSTDC_NO_DEPRECATE
+#endif
+
 #include <string.h>
 #include <stdarg.h>
 #include <ctype.h>
 #include "lexical_analyser.h"
+#include "script.h"
 
 #define FILE_NAMES_BUFFER_SIZE 128	// ファイル名保持バッファのサイズ
 #define MEMORY_POOL_SIZE 4096		// トークンを保持するメモリプールのサイズ
@@ -34,7 +42,7 @@ void InitializeLexicalAnalyser(
 	InitializePointerArray(&analyser->tokens, MEMORY_POOL_SIZE / sizeof(void*), NULL);
 	analyser->file_path = MEM_STRDUP_FUNC(file_path);
 	analyser->error_message_func = (error_message_func != NULL) ?
-		error_message_func : (void (*)(const char*))DefaultErrorMessage;
+		error_message_func : (void (*)(void*, const char*, int, const char*, ...))DefaultScriptErrorMessage;
 	analyser->error_message_func_data = message_func_data;
 }
 
@@ -99,7 +107,7 @@ static int GetNextTokenString(
 				if(**code == '\0')
 				{
 					analyser->error_message_func(analyser->error_message_func_data,
-						"Code is end before comment end.\nfile:%s\tline:%d\n", current_file, *line_count);
+						current_file, *line_count, "Code is end before comment end.\n");
 					return FALSE;
 				}
 				else if((*code)[0] == '*' && (*code)[1] == '/')
@@ -117,6 +125,7 @@ static int GetNextTokenString(
 
 				*code = (char*)GetNextUtf8Character(*code);
 			} while(comment_level > 0);
+			(*code) += 2;
 		}
 		else
 		{
@@ -131,8 +140,11 @@ static int GetNextTokenString(
 	if(isalpha(**code) != FALSE || **code == '_')
 	{
 		char *next;
+		char *token_string;
+		int i;
 		*token_type = TOKEN_TYPE_IDENT;
 
+		token_string = buffer;
 		next = (char*)GetNextUtf8Character(*code);
 		do
 		{
@@ -152,6 +164,15 @@ static int GetNextTokenString(
 				(*code)++;
 			} while(*code < next);
 			*buffer = '\0';
+		}
+
+		for(i=0; i<analyser->num_reserved; i++)
+		{
+			if(strcmp(token_string, analyser->reserved[i]) == 0)
+			{
+				*token_type = NUM_DEFAULT_TOKEN_TYPE + i;
+				break;
+			}
 		}
 	}
 	else if(isdigit(**code) != FALSE)
@@ -177,10 +198,10 @@ static int GetNextTokenString(
 			buffer++;
 
 			if(**code != ' ' && **code != '\n' && **code != '\r' && **code != '\0'
-				&& isdigit(**code) == FALSE && **code != '.')
+				&& isdigit(**code) == FALSE && **code != '.' && **code != ',')
 			{
 				analyser->error_message_func(analyser->error_message_func_data,
-					"Constant digit has wrong character.\nfile:%s\tline:%d\n", current_file, *line_count);
+					current_file, *line_count, "Constant digit has wrong character.\n");
 				return FALSE;
 			}
 			else if(**code == '.')
@@ -188,7 +209,7 @@ static int GetNextTokenString(
 				if(period_count > 0)
 				{
 					analyser->error_message_func(analyser->error_message_func_data,
-						"Constant float has over two periods.\nfile:%s\tline:%d\n", current_file, *line_count);
+						current_file, *line_count, "Constant float has over two periods.\n");
 					return FALSE;
 				}
 				else
@@ -213,7 +234,7 @@ static int GetNextTokenString(
 			if(**code == '\0')
 			{
 				analyser->error_message_func(analyser->error_message_func_data,
-					"Code is end before const string end.\nfile:%s\tline:%d\n", current_file, *line_count);
+					current_file, *line_count, "Code is end before const string end.\n\n");
 				return FALSE;
 			}
 			else if(**code == '\n')
@@ -641,7 +662,7 @@ int LexicalAnalyse(
 	if(src == NULL)
 	{
 		analyser->error_message_func(analyser->error_message_func_data,
-			"Failed to open %s.", analyser->file_path);
+			analyser->file_path, 0, "Failed to open %s.", analyser->file_path);
 		return FALSE;
 	}
 
@@ -736,6 +757,47 @@ TOKEN* LexicalAnalyserPeekToken(LEXICAL_ANALYSER* analyser, int id)
 	}
 
 	return ret;
+}
+
+/*
+ LexicalAnalyserSetReserved関数
+ 予約語を設定する
+ 引数
+ analyser		: ソースコードをトークンに分解するためのデータ
+ reserved		: 予約語の文字列データ
+ reserved_ids	: 予約語の識別IDデータ
+ num_reserved	: 設定する予約語の数
+*/
+void LexicalAnalyserSetReserved(
+	LEXICAL_ANALYSER* analyser,
+	const char** reserved,
+	uint16* reserved_ids,
+	int num_reserved
+)
+{
+	uint8 *allocated_data;
+	size_t allocate_size = 0;
+	char *str;
+	int i;
+
+	allocate_size = sizeof(char*) * num_reserved;
+	for(i=0; i<num_reserved; i++)
+	{
+		allocate_size += strlen(reserved[i]) + 1;
+	}
+	allocate_size += allocate_size % 4;
+	analyser->reserved = (char**)(allocated_data = (uint8*)MemoryPoolAllocate(&analyser->memory_pool, allocate_size + sizeof(uint16) * num_reserved));
+	str = (char*)&allocated_data[sizeof(char*) * num_reserved];
+	analyser->reserved_type = (uint16*)&allocated_data[allocate_size + (allocate_size % 4)];
+
+	for(i=0; i<num_reserved; i++)
+	{
+		analyser->reserved[i] = str;
+		str += strlen(reserved[i]) + 1;
+		(void)strcpy(analyser->reserved[i], reserved[i]);
+		analyser->reserved_type[i] = reserved_ids[i];
+	}
+	analyser->num_reserved = num_reserved;
 }
 
 #ifdef __cplusplus

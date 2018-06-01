@@ -3,161 +3,119 @@
 #include "token.h"
 #include "parser.h"
 #include "operand.h"
+#include "script.h"
 
 #define CODE_BLOCK_SIZE 4096
 
-#if 0
-void InitializeScriptCompiler(
-	SCRIPT_COMPILER* compiler,
-	POINTER_ARRAY* abstract_syntax_tree,
-	STRING_HASH_TABLE* reserved,
-	STRING_HASH_TABLE* functions,
-	MEMORY_POOL* memory_pool
+/*
+ InitializeScriptBasicCompiler関数
+ デフォルトのスクリプトのコンパイラを初期化する
+ 引数
+ compiler				: コンパイラのデータ
+ file_path				: 実行するスクリプトのファイルパス
+ user_function_names	: ユーザー定義関数の名前配列
+ num_user_functions		: ユーザー定義関数の数
+ user_data				: ユーザー定義関数で使うユーザーデータ
+ error_message			: エラーメッセージ表示用関数
+ error_message_data		: エラーメッセージ表示用関数で使うユーザーデータ
+*/
+void InitializeScriptBasicCompiler(
+	SCRIPT_BASIC_COMPILER* compiler,
+	const char* file_path,
+	const char** user_function_names,
+	int num_user_functions,
+	void* user_data,
+	void (*error_message)(void*, const char*, ...),
+	void* error_message_data
 )
 {
-	(void)memset(compiler, 0, sizeof(*compiler));
-
-	compiler->abstract_syntax_tree = abstract_syntax_tree;
-	compiler->reserved = reserved;
-	compiler->functions = functions;
-	compiler->memory_pool;
-}
-
-static size_t AbstractSyntaxTreeToByteCodeLocal(
-	SCRIPT_COMPILER* compiler,
-	uint8** code,
-	size_t* buffer_size,
-	ABSTRACT_SYNTAX_TREE_NODE* node,
-	STRING_HASH_TABLE* variable_pointer,
-	const char* function_name,
-	int register_number
-)
-{
-	STRING_HASH_TABLE *variable;
-	STRING_HASH_TABLE local_variable;
-	TOKEN *token;
-	TOKEN *variable_token;
-	size_t code_size = 0;
-	uint32 *code_pointer;
-
-	if(variable_pointer == NULL && function_name != NULL)
-	{
-		InitializeStringHashTable(&local_variable, 1024, NULL);
-		variable_pointer = &local_variable;
-	}
-	else
-	{
-		if(function_name == NULL)
-		{
-			variable = &compiler->global;
-		}
-		else
-		{
-			variable = variable_pointer;
-		}
-	}
-
-	token = node->token;
-	switch(token->token_type)
-	{
-	case TOKEN_TYPE_ASSIGN:
-		code_size += AbstractSyntaxTreeToByteCodeLocal(compiler, code, buffer_size,
-			node->child[1], variable_pointer, function_name);
-		if(code + sizeof(uint32) + sizeof(uint32) >= buffer_size)
-		{
-			buffer_size += CODE_BLOCK_SIZE;
-			*code = (uint8*)MEM_REALLOC_FUNC(*code, buffer_size);
-		}
-
-		variable_token = StringHashTableGet(variable, node->child[0]->token->name);
-		*code_pointer = (function_name == NULL) ? SCRIPT_OPERAND_GLOBAL_STORE : SCRIPT_OPERAND_HEAP_STORE;
-		code_size += sizeof(*code_pointer);
-		code_pointer = (uint32)&code[code_size];
-		if(variable_token != NULL)
-		{
-			*code_pointer = (uint32)((uint8*)variable_token - (uint8*)variable->buffer);
-		}
-		else
-		{
-			*code_pointer = (uint32)StringHashTableAppend(variable, variable_token->name);
-		}
-		code_size += sizeof(*code_pointer);
-
-		break;
-	case TOKEN_TYPE_PLUS:
-		code_size += AbstractSyntaxTreeToByteCodeLocal(compiler, code, buffer_size,
-			node->child[0], variable_pointer, function_name, register_number);
-		code_size += AbstractSyntaxTreeToByteCodeLocal(compiler, code, buffer_size,
-			node->child[1], variable_pointer, function_name, register_number + 1);
-		code_size += sizeof(*code_pointer) + sizeof(*code_pointer);
-
-		break;
-	default:
-		goto ERROR_END;
-	}
-
-	if(variable_pointer == NULL && function_name != NULL)
-	{
-		ReleaseStringHashTable(&local_variable);
-	}
-
-	return code_size;
-
-ERROR_END:
-	if(variable_pointer == NULL && function_name != NULL)
-	{
-		ReleaseStringHashTable(&local_variable);
-	}
-	MEM_FREE_FUNC(*code);
-	*code = NULL;
-	return 0;
-}
-
-static size_t AbstractSyntaxTreeToByteCode(SCRIPT_COMPILER* compiler, uint8** code)
-{
-	ABSTRACT_SYNTAX_TREE_NODE *node;
-	TOKEN *token;
-	size_t buffer_size = CODE_BLOCK_SIZE;
-	size_t code_size = 0;
-	uint32 operand;
-	int num_tree = (int)compiler->abstract_syntax_tree->num_data;
+#define MEMORY_BLOCK_SIZE 4096
+#define USER_FUNCTION_BLOCK_SIZE 128
 	int i;
-
-	*code = (uint8*)MEM_ALLOC_FUNC(buffer_size);
-
-	for(i=0; i<num_tree; i++)
+	(void)memset(compiler, 0, sizeof(*compiler));
+	InitializeStringHashTable(&compiler->user_function_names, USER_FUNCTION_BLOCK_SIZE, NULL);
+	for(i=0; i<num_user_functions; i++)
 	{
-		node = (ABSTRACT_SYNTAX_TREE_NODE*)compiler->abstract_syntax_tree->buffer[i];
-		token = node->token;
-
-		aa
+		(void)StringHashTableAppend(&compiler->user_function_names, user_function_names[i], (void*)(i+1));
 	}
+	compiler->user_data = user_data;
 
-	return code_size;
-
-ERROR_END:
-	MEM_FREE_FUNC(*code);
-	*code = NULL;
-	return 0;
+	InitializeLexicalAnalyser(&compiler->analyser, file_path, error_message, error_message_data);
+	InitializeMemoryPool(&compiler->memory_pool, MEMORY_BLOCK_SIZE);
+#undef MEMORY_BLOCK_SIZE
 }
 
-uint8* CompileScript(SCRIPT_COMPILER* compiler)
+/*
+ ReleaseScriptBasiccompiler関数
+ デフォルトのスクリプトのコンパイラデータのメモリ開放
+ 引数
+ compiler	: デフォルトのスクリプトのコンパイラデータ
+*/
+void ReleaseScriptBasicCompiler(SCRIPT_BASIC_COMPILER* compiler)
 {
-	uint8 *code;
-	uint8 *result = NULL;
-	size_t code_size;
-
-	code_size = AbstractSyntaxTreeToByteCode(compiler, &code);
-
-	if(code_size > 0)
-	{
-		result = (uint8*)MemoryPoolAllocate(compiler->memory_pool, code_size);
-		(void)memcpy(result, code, code_size);
-	}
-
-	MEM_FREE_FUNC(code);
-
-	return result;
+	ReleaseLexicalAnalyser(&compiler->analyser);
+	compiler->parser.element.release(&compiler->parser.element);
+	ReleaseStringHashTable(&compiler->user_function_names);
+	ReleaseMemoryPool(&compiler->memory_pool);
 }
 
-#endif
+/*
+ ScriptBasicCompilerCompile関数
+ デフォルトのスクリプトコンパイラでコンパイル実行
+ 引数
+ compiler	: デフォルトのスクリプトのコンパイラデータ
+ open_func	: ソースコードデータを開くための関数ポインタ
+ read_func	: ソースコードデータを読み込むための関数ポインタ
+ seek_func	: ソースコードデータをシークするための関数ポインタ
+ tell_func	: ソースコードデータのシーク位置を取得するための関数ポインタ
+ close_func	: ソースコードデータを閉じるための関数ポインタ
+ open_data	: ソースコードを開く際に使う外部データ
+ 返り値
+	正常終了:TRUE	異常終了:FALSE
+*/
+int ScriptBasicCompilerCompile(
+	SCRIPT_BASIC_COMPILER* compiler,
+	void* (*open_func)(const char*, const char*, void*),
+	size_t (*read_func)(void*, size_t, size_t, void*),
+	void* (*seek_func)(void*, long, int),
+	long (*tell_func)(void*),
+	int (*close_func)(void*),
+	void* open_data
+)
+{
+	const char **reserved_string;
+	uint16 reserved_ids[] = {SCRIPT_BASIC_RESERVED_IF, SCRIPT_BASIC_RESERVED_ELSE};
+	int (*rules[])(struct _SCRIPT_RULE_ELEMENT* rule, struct _LEXICAL_ANALYSER* analyser, void* function_data)
+		= {ScriptBasicIfRule, ScriptBasicElseRule};
+	int (*parse_functions[])(struct _SCRIPT_PARSER_ELEMENT* parser, int token_id, ABSTRACT_SYNTAX_TREE* parent)
+		= {ScriptBasicParserParseIf, ScriptBasicParserParseElse};
+	int num_strings;
+
+	reserved_string = ScriptBasicGetDefaultReservedStrings(&num_strings);
+	LexicalAnalyserSetReserved(&compiler->analyser, reserved_string,
+		reserved_ids, sizeof(rules) / sizeof(*rules));
+
+	if(LexicalAnalyse(&compiler->analyser, open_func, read_func,
+		seek_func, tell_func, close_func, open_data) == FALSE)
+	{
+		return FALSE;
+	}
+
+	InitializeScriptBasicRule(&compiler->rule, compiler->analyser.error_message_func,
+		compiler->analyser.error_message_func_data, (const char**)compiler->analyser.file_names.buffer, &compiler->memory_pool);
+	InitializeScriptBasicParser(&compiler->parser, &compiler->rule.element,
+		(TOKEN**)compiler->analyser.tokens.buffer, (int)compiler->analyser.tokens.num_data,
+			&compiler->user_function_names
+	);
+	ScriptRuleElementSetReservedRule(&compiler->rule.element,
+		rules, sizeof(rules) / sizeof(*rules), NULL);
+	ScriptParserElementSetReservedParseRule(&compiler->parser.element,
+		parse_functions);
+
+	if(compiler->parser.element.parse(&compiler->parser.element) == FALSE)
+	{
+		return FALSE;
+	}
+
+	return TRUE;
+}

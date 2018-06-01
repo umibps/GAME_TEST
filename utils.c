@@ -254,6 +254,25 @@ void PointerArrayAppend(POINTER_ARRAY* pointer_array, void* data)
 }
 
 /*
+ PointerArrayPop関数
+ 可変長ポインタ型配列の最後のデータを取り出して外す
+ 引数
+ pointer_array	: 可変長ポインタ型配列
+ 返り値
+	最後のデータのアドレス (データが無い場合はNULL)
+*/
+void* PointerArrayPop(POINTER_ARRAY* pointer_array)
+{
+	void *ret = NULL;
+	if(pointer_array->num_data > 0)
+	{
+		ret = pointer_array->buffer[pointer_array->num_data-1];
+		pointer_array->num_data--;
+	}
+	return ret;
+}
+
+/*
  InitializePriorityArray関数
  優先度付き配列を初期化する
  引数

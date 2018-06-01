@@ -198,6 +198,18 @@ EXTERN void ReleasePointerArray(POINTER_ARRAY* pointer_array);
 */
 EXTERN void PointerArrayAppend(POINTER_ARRAY* pointer_array, void* data);
 
+#define PointerArrayPush PointerArrayAppend
+
+/*
+ PointerArrayPop関数
+ 可変長ポインタ型配列の最後のデータを取り出して外す
+ 引数
+ pointer_array	: 可変長ポインタ型配列
+ 返り値
+	最後のデータのアドレス (データが無い場合はNULL)
+*/
+EXTERN void* PointerArrayPop(POINTER_ARRAY* pointer_array);
+
 /*
  InitializePriorityArray関数
  優先度付き配列を初期化する
