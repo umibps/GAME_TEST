@@ -801,5 +801,5 @@ void LexicalAnalyserSetReserved(
 }
 
 #ifdef __cplusplus
-e}
+}
 #endif

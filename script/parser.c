@@ -39,6 +39,7 @@ void ScriptParserElementNewLeafBinary(SCRIPT_PARSER_ELEMENT* parser, ABSTRACT_SY
 	parent->right = (ABSTRACT_SYNTAX_TREE*)MemoryPoolAllocate(parser->memory_pool, sizeof(*parent->right));
 	parent->right->token = right;
 	parent->right->left = parent->right->center = parent->right->right = NULL;
+	parent->center = NULL;
 }
 
 /*
@@ -280,7 +281,7 @@ static int ScriptBasicParserParseOneStepRecursive(SCRIPT_BASIC_PARSER* parser, A
 				return FALSE;
 			}
 		}
-		else if(token_type == TOKEN_TYPE_IDENT)
+		else if(token_type == TOKEN_TYPE_IDENT && (parser->flags & SCRIPT_BASIC_PARSER_FLAG_IN_ASSIGN) == FALSE)
 		{
 			if(parser->element.parse_function(&parser->element, i, parent) == FALSE)
 			{
@@ -320,10 +321,12 @@ static int ScriptBasicParserParse(SCRIPT_BASIC_PARSER* parser)
 		switch(parser->element.tokens[token_id]->token_type)
 		{
 		case TOKEN_TYPE_ASSIGN:
+			parser->flags |= SCRIPT_BASIC_PARSER_FLAG_IN_ASSIGN;
 			if(ScriptBasicParserParseOneStepRecursive(parser, NULL, token_id) == FALSE)
 			{
 				return FALSE;
 			}
+			parser->flags &= ~(SCRIPT_BASIC_PARSER_FLAG_IN_ASSIGN);
 			// セミコロンまで読み飛ばす
 			do
 			{
@@ -341,10 +344,12 @@ static int ScriptBasicParserParse(SCRIPT_BASIC_PARSER* parser)
 				if(parser->element.tokens[token_id]->token_type == TOKEN_TYPE_IDENT)
 				{
 					TOKEN *right = (token_id < parser->element.num_tokens - 1) ? parser->element.tokens[token_id + 1] : NULL;
+					parser->flags |= SCRIPT_BASIC_PARSER_FLAG_WASTE_RETURN;
 					if(parser->element.parse_function(&parser->element, token_id, NULL) == FALSE)
 					{
 						return FALSE;
 					}
+					parser->flags &= ~(SCRIPT_BASIC_PARSER_FLAG_WASTE_RETURN);
 					if(IsAbstractTreeLeafToken(parser->element.tokens[token_id]->token_type) != FALSE)
 					{
 						if(right != NULL && (right->token_type == TOKEN_TYPE_SEMI_COLON || right->token_type == TOKEN_TYPE_COMMA))
@@ -403,6 +408,7 @@ static int ScriptBasicParserParseAssign(SCRIPT_BASIC_PARSER* parser,int token_id
 		&& FLAG_CHECK(parser->token_check_flag, token_id) == 0)
 	{
 		TOKEN *left, *right;
+		uintptr_t function_id;
 		int next_id;
 
 		FLAG_ON(parser->token_check_flag, token_id);
@@ -426,6 +432,10 @@ static int ScriptBasicParserParseAssign(SCRIPT_BASIC_PARSER* parser,int token_id
 
 		next_id = token_id + 2;
 
+		if((function_id = (uintptr_t)StringHashTableGet(parser->element.user_functions,right->name)) != 0)
+		{
+			parser->element.parse_function(&parser->element, token_id + 1, parent->right);
+		}
 		if(ScriptBasicParserParseOneStepRecursive(parser, parent->right, next_id) == FALSE)
 		{
 			return FALSE;
@@ -2508,6 +2518,7 @@ static int ScriptBasicParserParseFunction(SCRIPT_BASIC_PARSER* parser, int token
 			}
 			parent->token = token;
 			parent->left = (ABSTRACT_SYNTAX_TREE*)function_id;
+			parent->center = (ABSTRACT_SYNTAX_TREE*)(((parser->flags & SCRIPT_BASIC_PARSER_FLAG_WASTE_RETURN) == FALSE) ? FALSE : TRUE);
 			if(right != NULL)
 			{
 				if(right->token_type == TOKEN_TYPE_LEFT_PAREN)
@@ -2722,9 +2733,10 @@ int ScriptBasicParserParseIf(SCRIPT_BASIC_PARSER* parser, int token_id, ABSTRACT
 				parser->element.rule->file_names[token->file_id], token->line, "\"(\" is missed after \"if\".\n");
 			return FALSE;
 		}
-		FLAG_ON(parser->token_check_flag, token_id++);
+		FLAG_ON(parser->token_check_flag, token_id);
+		token_id++;
 		PointerArrayAppend(&parser->element.abstract_syntax_tree, parent);
-		if(ScriptBasicParserParseOneStepRecursive(parser, parent->left, token_id) == FALSE)
+		if(ScriptBasicParserParseOneStepRecursive(parser, parent->left, token_id + 1) == FALSE)
 		{
 			return FALSE;
 		}
@@ -2754,14 +2766,39 @@ int ScriptBasicParserParseIf(SCRIPT_BASIC_PARSER* parser, int token_id, ABSTRACT
 				while(token_id < parser->element.num_tokens
 					&& parser->element.tokens[token_id]->token_type != TOKEN_TYPE_RIGHT_BRACE)
 				{
-					if(ScriptBasicParserParseOneStepRecursive(parser, parent, token_id) == FALSE)
+					int before_id = token_id;
+					parser->flags |= SCRIPT_BASIC_PARSER_FLAG_WASTE_RETURN;
+					if(parser->element.parse_function(&parser->element, token_id, NULL) == FALSE)
 					{
 						return FALSE;
 					}
-					FLAG_ON(parser->token_check_flag, token_id);
+					parser->flags &= ~(SCRIPT_BASIC_PARSER_FLAG_WASTE_RETURN);
 					while(FLAG_CHECK(parser->token_check_flag, token_id) != FALSE)
 					{
 						token_id++;
+					}
+					if(before_id == token_id)
+					{
+						if(parser->element.tokens[token_id]->token_type >= NUM_DEFAULT_TOKEN_TYPE)
+						{
+							int reserved_id = parser->element.tokens[token_id]->token_type - NUM_DEFAULT_TOKEN_TYPE;
+							if(reserved_id >= 0 && reserved_id < parser->element.rule->num_reserved_rule)
+							{
+								if(parser->element.parse_reserved[reserved_id](&parser->element, token_id, NULL) == FALSE)
+								{
+									return FALSE;
+								}
+							}
+						}
+						else if(ScriptBasicParserParseOneStepRecursive(parser, NULL, token_id) == FALSE)
+						{
+							return FALSE;
+						}
+						FLAG_ON(parser->token_check_flag, token_id);
+						while(FLAG_CHECK(parser->token_check_flag, token_id) != FALSE)
+						{
+							token_id++;
+						}
 					}
 				}
 				brace_tree = (ABSTRACT_SYNTAX_TREE*)MemoryPoolAllocate(parser->element.memory_pool, sizeof(*brace_tree));
@@ -2773,7 +2810,7 @@ int ScriptBasicParserParseIf(SCRIPT_BASIC_PARSER* parser, int token_id, ABSTRACT
 			}
 			else
 			{
-				if(ScriptBasicParserParseOneStepRecursive(parser, parent, token_id) == FALSE)
+				if(ScriptBasicParserParseOneStepRecursive(parser, NULL, token_id) == FALSE)
 				{
 					return FALSE;
 				}
@@ -2831,6 +2868,184 @@ int ScriptBasicParserParseElse(SCRIPT_BASIC_PARSER* parser, int token_id, ABSTRA
 	parser->element.rule->error_message(parser->element.rule->error_message_data,
 		file_name, line, "\"else\" is bad placed.\n");
 	return FALSE;
+}
+
+/*
+ ScriptBasicParserParseWhile関数
+ デフォルトの構文解析器でwhile制御構文を解析
+ 引数
+ parser		: 構文解析器
+ token_id	: 解析中のトークンID
+ parent		: 抽象構文木の親ノード
+ 返り値
+	正常終了:TRUE	異常終了:FALSE
+*/
+int ScriptBasicParserParseWhile(SCRIPT_BASIC_PARSER* parser, int token_id, ABSTRACT_SYNTAX_TREE* parent)
+{
+	if(parent != NULL)
+	{
+		TOKEN *token = parser->element.tokens[token_id];
+		parser->element.rule->error_message(parser->element.rule->error_message_data,
+			parser->element.rule->file_names[token->file_id], token->line, "\"while\" is detected bad place.\n");
+		return FALSE;
+	}
+
+	if(FLAG_CHECK(parser->token_check_flag, token_id) == 0)
+	{
+		ABSTRACT_SYNTAX_TREE *brace_tree = NULL;
+		int next_id;
+		FLAG_ON(parser->token_check_flag, token_id);
+		parent = (ABSTRACT_SYNTAX_TREE*)MemoryPoolAllocate(parser->element.memory_pool, sizeof(*parent));
+		parent->token = parser->element.tokens[token_id];
+		parent->left = (ABSTRACT_SYNTAX_TREE*)MemoryPoolAllocate(parser->element.memory_pool, sizeof(*parent->left));
+		(void)memset(parent->left, 0, sizeof(*parent->left));
+		parent->center = parent->right = NULL;
+
+		token_id++;
+		if(parser->element.tokens[token_id]->token_type != TOKEN_TYPE_LEFT_PAREN)
+		{
+			TOKEN *token = parser->element.tokens[token_id];
+			parser->element.rule->error_message(parser->element.rule->error_message_data,
+				parser->element.rule->file_names[token->file_id], token->line, "\"(\" is missed after \"while\".\n");
+			return FALSE;
+		}
+		FLAG_ON(parser->token_check_flag, token_id);
+		token_id++;
+		PointerArrayAppend(&parser->element.abstract_syntax_tree, parent);
+		next_id = parser->element.tokens[token_id + 1]->token_type == TOKEN_TYPE_RIGHT_PAREN ? token_id : token_id + 1;
+		if(ScriptBasicParserParseOneStepRecursive(parser, parent->left, next_id) == FALSE)
+		{
+			return FALSE;
+		}
+		while(FLAG_CHECK(parser->token_check_flag, token_id) != FALSE)
+		{
+			token_id++;
+		}
+		if(token_id == next_id && IsAbstractTreeLeafToken(parser->element.tokens[token_id]->token_type) != FALSE)
+		{
+			parent->left->token = parser->element.tokens[token_id];
+			token_id++;
+		}
+		if(parser->element.tokens[token_id]->token_type != TOKEN_TYPE_RIGHT_PAREN)
+		{
+			TOKEN *token = parser->element.tokens[token_id];
+			parser->element.rule->error_message(parser->element.rule->error_message_data,
+				parser->element.rule->file_names[token->file_id], token->line, "\")\" is missed after \"while\".\n");
+			return FALSE;
+		}
+		FLAG_ON(parser->token_check_flag, token_id);
+		token_id++;
+
+		if(parser->element.tokens[token_id]->token_type == TOKEN_TYPE_LEFT_BRACE)
+		{
+			parser->element.parse_brace(&parser->element, token_id, NULL);
+			token_id++;
+			while(token_id < parser->element.num_tokens
+				&& parser->element.tokens[token_id]->token_type != TOKEN_TYPE_RIGHT_BRACE)
+			{
+				int before_id = token_id;
+				parser->flags |= SCRIPT_BASIC_PARSER_FLAG_WASTE_RETURN;
+				if(parser->element.parse_function(&parser->element, token_id, NULL) == FALSE)
+				{
+					return FALSE;
+				}
+				parser->flags &= ~(SCRIPT_BASIC_PARSER_FLAG_WASTE_RETURN);
+				while(FLAG_CHECK(parser->token_check_flag, token_id) != FALSE)
+				{
+					token_id++;
+				}
+				if(before_id == token_id)
+				{
+					if(parser->element.tokens[token_id]->token_type >= NUM_DEFAULT_TOKEN_TYPE)
+					{
+						int reserved_id = parser->element.tokens[token_id]->token_type - NUM_DEFAULT_TOKEN_TYPE;
+						if(reserved_id >= 0 && reserved_id < parser->element.rule->num_reserved_rule)
+						{
+							if(parser->element.parse_reserved[reserved_id](&parser->element, token_id, NULL) == FALSE)
+							{
+								return FALSE;
+							}
+						}
+					}
+					else if(ScriptBasicParserParseOneStepRecursive(parser, NULL, token_id) == FALSE)
+					{
+						return FALSE;
+					}
+					FLAG_ON(parser->token_check_flag, token_id);
+					while(FLAG_CHECK(parser->token_check_flag, token_id) != FALSE)
+					{
+						token_id++;
+					}
+				}
+			}
+			brace_tree = (ABSTRACT_SYNTAX_TREE*)MemoryPoolAllocate(parser->element.memory_pool, sizeof(*brace_tree));
+			brace_tree->token = parser->element.tokens[token_id];
+			brace_tree->left = brace_tree->center = brace_tree->right = NULL;
+			PointerArrayAppend(&parser->element.abstract_syntax_tree, brace_tree);
+			FLAG_ON(parser->token_check_flag, token_id);
+			token_id++;
+		}
+		else
+		{
+			if(ScriptBasicParserParseOneStepRecursive(parser, NULL, token_id) == FALSE)
+			{
+				return FALSE;
+			}
+			while(FLAG_CHECK(parser->token_check_flag, token_id) != FALSE)
+			{
+				token_id++;
+			}
+			if(parser->element.tokens[token_id]->token_type == TOKEN_TYPE_SEMI_COLON)
+			{
+				token_id++;
+			}
+		}
+	}
+
+	return TRUE;
+}
+
+/*
+ ScriptBasicParserParseBreak関数
+ デフォルトの構文解析器でbreak制御構文を解析
+ 引数
+ parser		: 構文解析器
+ token_id	: 解析中のトークンID
+ parent		: 抽象構文木の親ノード
+ 返り値
+	正常終了:TRUE	異常終了:FALSE
+*/
+int ScriptBasicParserParseBreak(SCRIPT_BASIC_PARSER* parser, int token_id, ABSTRACT_SYNTAX_TREE* parent)
+{
+	if(parent != NULL)
+	{
+		TOKEN *token = parser->element.tokens[token_id];
+		parser->element.rule->error_message(parser->element.rule->error_message_data,
+			parser->element.rule->file_names[token->file_id], token->line, "\"break\" is detected bad place.\n");
+		return FALSE;
+	}
+
+	if(FLAG_CHECK(parser->token_check_flag, token_id) == 0)
+	{
+		TOKEN *right;
+
+		right = (token_id >= parser->element.num_tokens - 1) ? NULL : parser->element.tokens[token_id + 1];
+		if(right == NULL || right->token_type != TOKEN_TYPE_SEMI_COLON)
+		{
+			TOKEN *token = parser->element.tokens[token_id];
+			parser->element.rule->error_message(parser->element.rule->error_message_data,
+				parser->element.rule->file_names[token->file_id], token->line, "\";\" is not found after break.\n");
+		}
+
+		FLAG_ON(parser->token_check_flag, token_id);
+		parent = (ABSTRACT_SYNTAX_TREE*)MemoryPoolAllocate(parser->element.memory_pool, sizeof(*parent));
+		parent->token = parser->element.tokens[token_id];
+		parent->left = parent->center = parent->right = NULL;
+		PointerArrayAppend(&parser->element.abstract_syntax_tree, parent);
+		FLAG_ON(parser->token_check_flag, token_id + 1);
+	}
+
+	return TRUE;
 }
 
 #ifdef __cplusplus

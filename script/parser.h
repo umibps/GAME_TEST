@@ -7,8 +7,8 @@
 #include "../utils.h"
 
 /*
-eSCRIPT_BASIC_RESERVED_TYPE列挙体
-デフォルトのスクリプト実行処理での予約語識別ID
+ eSCRIPT_BASIC_RESERVED_TYPE列挙体
+ デフォルトのスクリプト実行処理での予約語識別ID
 */
 typedef enum _eSCRIPT_BASIC_RESERVED_TYPE
 {
@@ -18,6 +18,16 @@ typedef enum _eSCRIPT_BASIC_RESERVED_TYPE
 	SCRIPT_BASIC_RESERVED_BREAK,
 	SCRIPT_BASIC_RESERVED_USER_FUNCTION
 } eSCRIPT_BASIC_RESERVED_TYPE;
+
+/*
+ eSCRIPT_BASIC_PARSER_FLAGS列挙体
+ デフォルトの構文解析器の制御フラグ
+*/
+typedef enum _eSCRIPT_BASIC_PARSER_FLAGS
+{
+	SCRIPT_BASIC_PARSER_FLAG_IN_ASSIGN = 0x01,		// 代入中
+	SCRIPT_BASIC_PARSER_FLAG_WASTE_RETURN = 0x02	// 関数の返り値を捨てる
+} eSCRIPT_BASIC_PARSER_FLAG;
 
 /*
  SCRIPT_PARSER_ELEMENT構造体
@@ -83,6 +93,7 @@ typedef struct _SCRIPT_BASIC_PARSER
 	unsigned int *token_check_flag;
 	// 同じ計算優先度の演算が続いた時の親変更用
 	POINTER_ARRAY new_parent;
+	int flags;
 } SCRIPT_BASIC_PARSER;
 
 #ifdef __cplusplus
@@ -143,6 +154,30 @@ int ScriptBasicParserParseIf(SCRIPT_BASIC_PARSER* parser, int token_id, ABSTRACT
 	常にFALSE
 */
 int ScriptBasicParserParseElse(SCRIPT_BASIC_PARSER* parser, int token_id, ABSTRACT_SYNTAX_TREE* parent);
+
+/*
+ ScriptBasicParserParseWhile関数
+ デフォルトの構文解析器でwhile制御構文を解析
+ 引数
+ parser		: 構文解析器
+ token_id	: 解析中のトークンID
+ parent		: 抽象構文木の親ノード
+ 返り値
+	正常終了:TRUE	異常終了:FALSE
+*/
+int ScriptBasicParserParseWhile(SCRIPT_BASIC_PARSER* parser, int token_id, ABSTRACT_SYNTAX_TREE* parent);
+
+/*
+ ScriptBasicParserParseBreak関数
+ デフォルトの構文解析器でbreak制御構文を解析
+ 引数
+ parser		: 構文解析器
+ token_id	: 解析中のトークンID
+ parent		: 抽象構文木の親ノード
+ 返り値
+	正常終了:TRUE	異常終了:FALSE
+*/
+int ScriptBasicParserParseBreak(SCRIPT_BASIC_PARSER* parser, int token_id, ABSTRACT_SYNTAX_TREE* parent);
 
 #ifdef __cplusplus
 }

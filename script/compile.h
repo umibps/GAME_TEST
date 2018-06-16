@@ -19,6 +19,8 @@ typedef struct _SCRIPT_BASIC_COMPILER
 	SCRIPT_BASIC_PARSER parser;
 	STRING_HASH_TABLE user_function_names;
 	void *user_data;
+	BYTE_ARRAY byte_code;
+	POINTER_ARRAY jump_buffer;
 	MEMORY_POOL memory_pool;
 } SCRIPT_BASIC_COMPILER;
 
@@ -68,9 +70,10 @@ EXTERN void ReleaseScriptBasicCompiler(SCRIPT_BASIC_COMPILER* compiler);
  close_func	: ソースコードデータを閉じるための関数ポインタ
  open_data	: ソースコードを開く際に使う外部データ
  返り値
-	正常終了:TRUE	異常終了:FALSE
+	コンパイルの結果、生成されたバイトコード	異常終了時はNULL
+	不要になったらMEM_FREE_FUNCする
 */
-EXTERN int ScriptBasicCompilerCompile(
+EXTERN uint8* ScriptBasicCompilerCompile(
 	SCRIPT_BASIC_COMPILER* compiler,
 	void* (*open_func)(const char*, const char*, void*),
 	size_t (*read_func)(void*, size_t, size_t, void*),
@@ -79,6 +82,16 @@ EXTERN int ScriptBasicCompilerCompile(
 	int (*close_func)(void*),
 	void* open_data
 );
+
+/*
+ ScriptBasicCompilerGetByteCodeSize関数
+ コンパイルの結果得られたバイトコードのサイズを取得する
+ 引数
+ compiler	: スクリプトのコンパイラ
+ 返り値
+	バイトコードのサイズ
+*/
+EXTERN size_t ScriptBasicCompilerGetByteCodeSize(SCRIPT_BASIC_COMPILER* compiler);
 
 #ifdef __cplusplus
 }

@@ -124,6 +124,30 @@ int ScriptBasicIfRule(struct _SCRIPT_RULE_ELEMENT* rule, struct _LEXICAL_ANALYSE
 
 #define ScriptBasicElseRule ScriptBasicDummyRule
 
+/*
+ ScriptBasicWhileRule関数
+ while制御構文ルール
+ 引数
+ rule			: 構文解析のルールを管理するデータ
+ analyser		: 字句解析器
+ function_data	: ダミー
+ 返り値
+	ルールを満足:TRUE	ルールを満たさない:FALSE
+*/
+int ScriptBasicWhileRule(struct _SCRIPT_RULE_ELEMENT* rule, struct _LEXICAL_ANALYSER* analyser, void* function_data);
+
+/*
+ ScriptBasicBreakRule関数
+ break制御構文ルール
+ 引数
+ rule			: 構文解析のルールを管理するデータ
+ analyser		: 字句解析器
+ function_data	: ダミー
+ 返り値
+	ルールを満足:TRUE	ルールを満たさない:FALSE
+*/
+int ScriptBasicBreakRule(struct _SCRIPT_RULE_ELEMENT* rule, struct _LEXICAL_ANALYSER* analyser, void* function_data);
+
 #ifdef __cplusplus
 }
 #endif
